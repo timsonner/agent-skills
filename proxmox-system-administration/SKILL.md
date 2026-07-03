@@ -1,13 +1,6 @@
 ---
 name: proxmox-system-administration
 description: Use when operating a Proxmox VE host with least-privilege workflows, reusable VM templates, and auditable hardening.
-version: 1.0.0
-author: Hermes Agent
-license: MIT
-metadata:
-  hermes:
-    tags: [proxmox, pve, virtualization, vm, lxc, least-privilege, security, devops]
-    related_skills: [hermes-agent]
 ---
 
 # Proxmox System Administration (Sanitized, Least-Privilege First)
