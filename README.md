@@ -55,6 +55,7 @@ An extensive and highly segmented guide collection for learning, installing, con
 - **Intro Specification**: [opencode/intro/SKILL.md](opencode/intro/SKILL.md) — Fundamental overview of what OpenCode is and how to get started.
 - **Prerequisites Guide**: [opencode/prerequisites/SKILL.md](opencode/prerequisites/SKILL.md) — Software pre-requirements, terminal choices, and initial API key configs.
 - **Platform Installation**: [opencode/install/SKILL.md](opencode/install/SKILL.md) — Multiple deployment and installation methods (scripts, npm/Node.js, Homebrew, Arch Linux, and Windows).
+- **Windows Implementation**: [opencode/windows/SKILL.md](opencode/windows/SKILL.md) — Specific guidelines and setups for installing and optimizing OpenCode on Windows systems natively or utilizing WSL.
 
 ### Project Onboarding & Setup
 - **Initialization Guide**: [opencode/initialize/SKILL.md](opencode/initialize/SKILL.md) — Preparing folders for OpenCode development and setting up custom agents.
@@ -90,6 +91,8 @@ A suite of highly granular guides and references for conducting authorized cyber
 - **General Methodology**: [pentest/pentesting-methodology-guide.md](pentest/pentesting-methodology-guide.md) — Clean, PTES/OWASP-aligned high-level processes and safety principles.
 - **Kali Linux Execution Guide**: [pentest/methodology/SKILL.md](pentest/methodology/SKILL.md) — Concrete step-by-step phases of discovery, scan, leverage, elevation, and report using standard tool structures.
 - **Attack Payload Book**: [pentest/attack-patterns/SKILL.md](pentest/attack-patterns/SKILL.md) — Ready-to-go reference recipes for common vulnerabilities, including Web (LFI, XXE, SSRF, XSS), Command Injection, SQL Injection, Windows Exploitation, and Reverse Shells.
+- **Defender OPSEC Hardening**: [defender-opsec/SKILL.md](defender-opsec/SKILL.md) — Harden Windows Defender privacy settings for authorized pentest engagements, disabling background telemetry, automatic sample submissions, and cloud protection to preserve confidentiality.
+- **WSLC Pentest Workflow**: [wslc-pentest-workflow/SKILL.md](wslc-pentest-workflow/SKILL.md) — Run authorized pentest workflows inside persistent WSL containers (`wslc`), isolating tooling, mapping actions to methodology, and saving persistent artifacts to the host.
 
 ### Pentest Tools Directory
 The repository defines over 90 distinct penetration testing tool sub-skills. The main entry point is [pentest/tools/SKILL.md](pentest/tools/SKILL.md), which is supplemented by highly detailed, individual tool guidelines:
