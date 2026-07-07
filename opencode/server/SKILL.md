@@ -1,6 +1,7 @@
 ---
 name: server
 description: OpenCode Server - how to run and manage the OpenCode server for API access and integrations
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

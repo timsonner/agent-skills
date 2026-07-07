@@ -1,6 +1,7 @@
 ---
 name: plugins
 description: OpenCode Plugins - how to find, install, and use plugins to extend OpenCode functionality
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

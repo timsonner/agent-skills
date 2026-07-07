@@ -1,6 +1,7 @@
 ---
 name: configure/keybinds
 description: Configuration for OpenCode keybinds - customizing keyboard shortcuts for the TUI and desktop app
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

@@ -1,6 +1,7 @@
 ---
 name: usage/gitlab
 description: Using OpenCode with GitLab - repository management, merge requests, and CI/CD features
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

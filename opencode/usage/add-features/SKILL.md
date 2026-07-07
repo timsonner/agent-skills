@@ -1,6 +1,7 @@
 ---
 name: usage/add-features
 description: How to use OpenCode to add new features to your project - planning, iterating, and building with AI assistance
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

@@ -1,6 +1,7 @@
 ---
 name: configure/custom-tools
 description: Configuration for OpenCode custom tools - creating and managing tools that the LLM can call during conversations
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

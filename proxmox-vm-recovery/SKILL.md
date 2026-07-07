@@ -1,6 +1,8 @@
 ---
 name: proxmox-vm-recovery
 description: Handles troubleshooting and recovery of virtual machines (VMs) stuck during boot on Proxmox VE hosts. Activate this skill when a user reports a VM (especially Windows 11/UEFI guest) failing to boot, hanging at the OVMF logo, or showing "Start boot option" loading screens.
+author: Tim Sonner
+license: MIT
 ---
 
 # Proxmox VE VM Recovery & Stuck Boot Troubleshooting Guide

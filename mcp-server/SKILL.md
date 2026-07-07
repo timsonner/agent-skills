@@ -1,6 +1,7 @@
 ---
 name: mcp-server
 description: Specification for building Model Context Protocol servers using Python
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

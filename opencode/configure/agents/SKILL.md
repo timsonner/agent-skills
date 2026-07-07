@@ -1,6 +1,7 @@
 ---
 name: configure/agents
 description: Configuration for OpenCode agents - defining and customizing AI agent behaviors and capabilities
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

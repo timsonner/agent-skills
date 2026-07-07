@@ -1,6 +1,7 @@
 ---
 name: ralph-wiggum-pattern
 description: A Python-focused implementation of the Ralph Wiggum technique for AI-assisted software development
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

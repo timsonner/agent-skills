@@ -1,6 +1,7 @@
 ---
 name: configure/models
 description: Configuration for OpenCode models - selecting and configuring LLM providers and specific models
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

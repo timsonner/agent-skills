@@ -1,6 +1,7 @@
 ---
 name: configure/skills
 description: Configuration for OpenCode skills - managing and configuring agent skills for reusable behaviors
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

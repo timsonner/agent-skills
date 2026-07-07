@@ -1,6 +1,8 @@
 ---
 name: read-canvas-browser
 description: Use this skill when browser text and accessibility tools fail because the page renders content in a canvas and you need to inspect or interact with it visually.
+author: Tim Sonner
+license: MIT
 ---
 
 # Skill: Interacting with Canvas-Rendered Browser Content

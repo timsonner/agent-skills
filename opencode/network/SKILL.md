@@ -1,6 +1,7 @@
 ---
 name: network
 description: Network configuration for OpenCode - proxy settings, network troubleshooting, and connectivity options
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

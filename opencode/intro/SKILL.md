@@ -1,6 +1,7 @@
 ---
 name: intro
 description: Introduction to OpenCode - overview of what OpenCode is and how to get started
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

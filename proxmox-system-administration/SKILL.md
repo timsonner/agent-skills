@@ -1,6 +1,8 @@
 ---
 name: proxmox-system-administration
 description: Use when operating a Proxmox VE host with least-privilege workflows, reusable VM templates, and auditable hardening.
+author: Tim Sonner
+license: MIT
 ---
 
 # Proxmox System Administration (Sanitized, Least-Privilege First)

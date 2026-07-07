@@ -1,6 +1,8 @@
 ---
 name: opencode-harness
 description: "Run the OpenCode CLI harness for coding tasks from a terminal session with interactive PTY support (harness-only)."
+author: Tim Sonner
+license: MIT
 ---
 
 # OpenCode Harness (CLI/TUI)

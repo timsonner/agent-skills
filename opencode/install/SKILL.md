@@ -1,6 +1,7 @@
 ---
 name: install
 description: Installation instructions for OpenCode - various methods including script, Node.js, Homebrew, Arch Linux, and Windows
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

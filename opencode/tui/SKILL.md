@@ -1,6 +1,7 @@
 ---
 name: tui
 description: Terminal User Interface (TUI) instructions for OpenCode - how to navigate and use the OpenCode TUI
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

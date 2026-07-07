@@ -1,6 +1,7 @@
 ---
 name: providers
 description: LLM provider configuration for OpenCode - how to set up and use different language model providers
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

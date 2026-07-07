@@ -1,6 +1,7 @@
 ---
 name: sdk
 description: OpenCode SDK - how to extend and customize OpenCode using the software development kit
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

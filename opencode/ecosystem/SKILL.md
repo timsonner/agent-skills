@@ -1,6 +1,7 @@
 ---
 name: ecosystem
 description: OpenCode Ecosystem - tools, integrations, and community resources surrounding OpenCode
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

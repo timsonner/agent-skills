@@ -1,6 +1,7 @@
 ---
 name: troubleshooting
 description: Troubleshooting instructions for OpenCode - common issues and solutions
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

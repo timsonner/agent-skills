@@ -1,6 +1,7 @@
 ---
 name: configure/tools
 description: Configuration for OpenCode tools - managing tool permissions and built-in tools like bash, edit, write, read, etc.
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

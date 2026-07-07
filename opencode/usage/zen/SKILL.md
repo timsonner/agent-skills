@@ -1,6 +1,7 @@
 ---
 name: usage/zen
 description: Using OpenCode Zen - curated list of tested and verified LLM models
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

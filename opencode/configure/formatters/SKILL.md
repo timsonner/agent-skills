@@ -1,6 +1,7 @@
 ---
 name: configure/formatters
 description: Configuration for OpenCode formatters - setting up and customizing code formatters for different languages
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

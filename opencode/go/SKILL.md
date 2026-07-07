@@ -1,6 +1,7 @@
 ---
 name: go
 description: Go language support in OpenCode - how to work with Go projects using OpenCode
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:
