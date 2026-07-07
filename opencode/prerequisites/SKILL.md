@@ -1,6 +1,7 @@
 ---
 name: prerequisites
 description: Prerequisites for using OpenCode - terminal emulator requirements and API key setup
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

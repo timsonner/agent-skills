@@ -1,6 +1,7 @@
 ---
 name: usage/web
 description: Using OpenCode for web development - HTML, CSS, JavaScript, and frontend frameworks
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

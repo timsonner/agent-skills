@@ -1,6 +1,7 @@
 ---
 name: configure/lsp
 description: Configuration for OpenCode LSP servers - setting up and customizing Language Server Protocol integration
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

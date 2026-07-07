@@ -1,6 +1,7 @@
 ---
 name: usage/go
 description: Using OpenCode with Go projects - specific workflows and tips for Go development
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

@@ -1,6 +1,7 @@
 ---
 name: share
 description: Sharing instructions for OpenCode - how to share conversations with your team
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

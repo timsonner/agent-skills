@@ -1,6 +1,7 @@
 ---
 name: windows
 description: Windows-specific instructions for OpenCode - installation and usage on Windows systems
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

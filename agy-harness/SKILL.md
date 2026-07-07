@@ -1,6 +1,8 @@
 ---
 name: agy-harness
 description: "Run the Antigravity (Gemini) CLI agent harness via the agy binary. Includes interactive session control and exit handling."
+author: Tim Sonner
+license: MIT
 ---
 
 # AGY (Antigravity CLI / Gemini CLI)

@@ -1,6 +1,7 @@
 ---
 name: enterprise
 description: Enterprise features and configuration for OpenCode - team deployment, security, and administration
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

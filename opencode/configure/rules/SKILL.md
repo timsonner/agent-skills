@@ -1,6 +1,7 @@
 ---
 name: configure/rules
 description: Configuration for OpenCode rules - defining custom instructions and behaviors for the AI agent
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

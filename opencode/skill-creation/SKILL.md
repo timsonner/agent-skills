@@ -1,6 +1,7 @@
 ---
 name: skill-creation
 description: A skill to help create OpenCode compatible skill files by adding the required YAML frontmatter to a markdown file
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

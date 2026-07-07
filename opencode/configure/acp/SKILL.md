@@ -1,6 +1,7 @@
 ---
 name: configure/acp
 description: Configuration for OpenCode ACP Support - setting up OpenCode to work with ACP-compatible editors
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

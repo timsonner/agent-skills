@@ -1,6 +1,7 @@
 ---
 name: usage/ask-questions
 description: How to ask OpenCode questions about your codebase - using context, file references, and effective questioning techniques
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

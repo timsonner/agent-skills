@@ -1,6 +1,7 @@
 ---
 name: usage/ide
 description: Using OpenCode with IDE extensions - VS Code, JetBrains, and other editor integrations
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

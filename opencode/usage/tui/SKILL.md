@@ -1,6 +1,7 @@
 ---
 name: usage/tui
 description: Using OpenCode's Terminal User Interface (TUI) - navigation, modes, and productivity tips
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

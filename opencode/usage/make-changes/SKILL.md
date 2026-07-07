@@ -1,6 +1,7 @@
 ---
 name: usage/make-changes
 description: How to use OpenCode to make direct changes to your codebase - straightforward modifications and refactoring
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

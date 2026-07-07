@@ -1,6 +1,7 @@
 ---
 name: customize
 description: Customization instructions for OpenCode - how to pick themes, customize keybinds, configure formatters, create custom commands, and modify OpenCode config
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

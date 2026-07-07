@@ -1,9 +1,9 @@
 ---
 name: defender-opsec
 description: "Harden Windows Defender privacy settings for authorized pentest engagements. Disables telemetry uploads, sample submission, and cloud reporting to prevent leaking target info, credentials, and tooling to Microsoft. Includes exclusion management and post-engagement re-enablement."
-version: "1.0.0"
-author: Agent
+author: Tim Sonner
 license: MIT
+version: "1.0.0"
 platforms: [windows]
 ---
 

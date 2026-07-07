@@ -1,6 +1,7 @@
 ---
 name: initialize
 description: Initialization instructions for OpenCode - how to initialize OpenCode for a project and create AGENTS.md
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

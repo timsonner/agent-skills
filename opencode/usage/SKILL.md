@@ -1,6 +1,7 @@
 ---
 name: usage
 description: Usage instructions for OpenCode - how to ask questions, add features, make changes, and undo changes
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

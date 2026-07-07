@@ -1,6 +1,7 @@
 ---
 name: usage/github
 description: Using OpenCode with GitHub - repository management, pull requests, and collaboration features
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

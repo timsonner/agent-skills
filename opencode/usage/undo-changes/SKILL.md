@@ -1,6 +1,7 @@
 ---
 name: usage/undo-changes
 description: How to undo and redo changes made by OpenCode - reverting modifications and recovering work
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

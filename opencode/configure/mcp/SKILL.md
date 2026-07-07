@@ -1,6 +1,7 @@
 ---
 name: configure/mcp
 description: Configuration for OpenCode MCP servers - adding local and remote Model Context Protocol tools
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

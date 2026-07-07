@@ -1,6 +1,7 @@
 ---
 name: configure/permissions
 description: Configuration for OpenCode permissions - controlling which actions require approval to run
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

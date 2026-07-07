@@ -1,6 +1,7 @@
 ---
 name: configure/themes
 description: Configuration for OpenCode themes - customizing the visual appearance of the TUI and desktop app
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

@@ -1,6 +1,7 @@
 ---
 name: configure
 description: Configuration instructions for OpenCode - how to set up LLM providers and API keys
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

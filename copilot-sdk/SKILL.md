@@ -1,6 +1,7 @@
 ---
 name: copilot-python-sdk
 description: Python SDK for programmatic control of GitHub Copilot CLI via JSON-RPC
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

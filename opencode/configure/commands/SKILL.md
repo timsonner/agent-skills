@@ -1,6 +1,7 @@
 ---
 name: configure/commands
 description: Configuration for OpenCode custom commands - creating and managing custom slash commands for repetitive tasks
+author: Tim Sonner
 license: MIT
 compatibility: opencode
 metadata:

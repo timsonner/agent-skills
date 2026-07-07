@@ -1,6 +1,8 @@
 ---
 name: wsl-containers
 description: Commands, references, and APIs for building, running, and managing Linux containers using the wslc CLI or the Microsoft.WSL.Containers SDK in Windows Subsystem for Linux (WSL).
+author: Tim Sonner
+license: MIT
 ---
 
 # WSL Containers Skill Guide
@@ -46,21 +48,21 @@ If WSL is not on the latest version or `wslc` is not available:
 Once installed via the pre-release channel, `wslc` is added to the system `PATH` (a shell restart may be required). If it is not found, you can run it using its absolute path: `& "C:\Program Files\WSL\wslc.exe"`.
 
 ### Common Commands
-*   **Run a basic container (interactive / ephemeral):**
+-   **Run a basic container (interactive / ephemeral):**
     ```powershell
     wslc run --rm -it ubuntu:latest bash -c "echo Hello world from WSL container!"
     ```
-*   **Run a container in the background (detached) with port publishing:**
+-   **Run a container in the background (detached) with port publishing:**
     ```powershell
     wslc run -it --rm -d -p 8080:80 --name web nginx
     ```
-*   **List images:**
+-   **List images:**
     ```powershell
     wslc image ls
     # or
     wslc images
     ```
-*   **List containers (running & stopped):**
+-   **List containers (running & stopped):**
     ```powershell
     wslc container ps
     # or
@@ -68,27 +70,27 @@ Once installed via the pre-release channel, `wslc` is added to the system `PATH`
     # List all including stopped
     wslc container ps -a
     ```
-*   **Stop a running container:**
+-   **Stop a running container:**
     ```powershell
     wslc container stop <container-name-or-id>
     ```
-*   **Remove a container:**
+-   **Remove a container:**
     ```powershell
     wslc remove <container-name-or-id>
     ```
-*   **Check container resource utilization statistics:**
+-   **Check container resource utilization statistics:**
     ```powershell
     wslc stats
     ```
-*   **View container logs:**
+-   **View container logs:**
     ```powershell
     wslc logs <container-name-or-id>
     ```
-*   **Execute a command inside a running container:**
+-   **Execute a command inside a running container:**
     ```powershell
     wslc exec -it <container-name-or-id> bash
     ```
-*   **Build an image from a Dockerfile:**
+-   **Build an image from a Dockerfile:**
     ```powershell
     wslc build -t my-custom-image:latest .
     ```
@@ -110,9 +112,9 @@ By default, using the `--rm` flag deletes the container upon exit. To create a p
    wslc exec my-kali apt-get install -y curl
    ```
 4. **Manage its lifecycle**:
-   * Stop the container: `wslc stop my-kali`
-   * Restart the container: `wslc start my-kali`
-   * Remove the container permanently: `wslc remove my-kali`
+   - Stop the container: `wslc stop my-kali`
+   - Restart the container: `wslc start my-kali`
+   - Remove the container permanently: `wslc remove my-kali`
 
 5. **Volume Mounts (Host Directory Persistence)**:
    Use the `-v` or `--volume` flag to bind-mount a Windows directory directly inside the container (highly recommended for developer source code and logs):
@@ -211,12 +213,12 @@ Because `wslc` containers run on standard Docker under the hood, you can run pri
 
 ## 5. Troubleshooting & Best Practices
 
-*   **Command Not Found (`wslc`):** If running `wslc` fails with a command not recognized error, confirm WSL is updated to the latest pre-release. Use the full path: `& "C:\Program Files\WSL\wslc.exe"`.
-*   **Interactive Sessions & Isolation:** Programmatic sessions created via `Session` are separate from the system-wide default namespace. Containers started programmatically will not display in the default `wslc container list` unless they share the same session context.
-*   **Networking Port Mapping:** Verify that ports mapped via `-p` (e.g. `8080:80`) do not conflict with active Windows services or existing WSL distributions.
-*   **Privileged Containers & CAP_NET_ADMIN Workaround:** Since the preview `wslc.exe` CLI lacks the `--privileged` or `--cap-add` flags, you cannot run network-administrative tasks (like VPN tunnels / `ioctl TUNSETIFF` calls) directly via the standard CLI.
-    *   **Architecture & Rationale:** Under the hood, `wslc` is a front-end Windows client wrapper that communicates with a standard Linux Docker daemon (`dockerd`) running inside a background Hyper-V Session VM. While the preview CLI client restricts capabilities for simplicity and security, the underlying Docker engine supports them fully. You can bypass client-side wrapper restrictions by executing commands directly against the internal daemon via the `wslc system session run` bridge.
-    *   **Workaround Steps:**
+-   **Command Not Found (`wslc`):** If running `wslc` fails with a command not recognized error, confirm WSL is updated to the latest pre-release. Use the full path: `& "C:\Program Files\WSL\wslc.exe"`.
+-   **Interactive Sessions & Isolation:** Programmatic sessions created via `Session` are separate from the system-wide default namespace. Containers started programmatically will not display in the default `wslc container list` unless they share the same session context.
+-   **Networking Port Mapping:** Verify that ports mapped via `-p` (e.g. `8080:80`) do not conflict with active Windows services or existing WSL distributions.
+-   **Privileged Containers & CAP_NET_ADMIN Workaround:** Since the preview `wslc.exe` CLI lacks the `--privileged` or `--cap-add` flags, you cannot run network-administrative tasks (like VPN tunnels / `ioctl TUNSETIFF` calls) directly via the standard CLI.
+    -   **Architecture & Rationale:** Under the hood, `wslc` is a front-end Windows client wrapper that communicates with a standard Linux Docker daemon (`dockerd`) running inside a background Hyper-V Session VM. While the preview CLI client restricts capabilities for simplicity and security, the underlying Docker engine supports them fully. You can bypass client-side wrapper restrictions by executing commands directly against the internal daemon via the `wslc system session run` bridge.
+    -   **Workaround Steps:**
         ```powershell
         # 1. Run a privileged container in the VM's docker daemon
         wslc system session run docker run -d --name privileged-kali --privileged kalilinux/kali-rolling sleep infinity
@@ -228,14 +230,14 @@ Because `wslc` containers run on standard Docker under the hood, you can run pri
         # 3. Exec commands inside the privileged container
         wslc system session run docker exec -it privileged-kali <command>
         ```
-*   **Stuck Background / Session Tasks (Timeout check-in workflow):**
+-   **Stuck Background / Session Tasks (Timeout check-in workflow):**
     Some WSL container or session commands (e.g. `wslc system session run`) do not close their stdout descriptors automatically, causing background tasks to remain in a `RUNNING` state indefinitely.
-    *   **Agent Execution Workflow:**
+    -   **Agent Execution Workflow:**
         1. **Propose the command** as a background task using `run_command` with a standard wait time.
         2. **Schedule a check-in timer** immediately using the `schedule` tool:
-           * `DurationSeconds`: Set to 5–10 seconds.
-           * `TimerCondition`: Reference the task ID of the command (e.g. `task-123`).
-           * `Prompt`: "Check on status of task-123"
+           - `DurationSeconds`: Set to 5–10 seconds.
+           - `TimerCondition`: Reference the task ID of the command (e.g. `task-123`).
+           - `Prompt`: "Check on status of task-123"
         3. **End turn** by calling no tools and waiting for the timer to fire or the task to finish.
         4. **Check status:** When notified, call `manage_task` with action `status` on the task ID.
         5. **Kill if completed:** If the log output contains the expected results (showing the command completed successfully in the background), call `manage_task` with action `kill` to terminate the hanging shell connection and free system resources.
