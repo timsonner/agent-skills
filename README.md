@@ -123,7 +123,7 @@ Guides for configuring, hardening, recovering, and virtualizing systems and cont
 
 ### WSL Linux Containers
 - **Path**: [wsl-containers/SKILL.md](wsl-containers/SKILL.md)
-- **Description**: Run and orchestrate Linux containers in Windows Subsystem for Linux using `wslc.exe` and the Microsoft.WSL.Containers developer SDK.
+- **Description**: Native WSL Containers via `wslc.exe` + `Microsoft.WSL.Containers` — man-style CLI flags, sessions, volumes/networks/GPU, and C# API reference (preview 2.9.3+).
 
 ---
 
