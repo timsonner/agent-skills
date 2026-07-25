@@ -125,6 +125,10 @@ Guides for configuring, hardening, recovering, and virtualizing systems and cont
 - **Path**: [wsl-containers/SKILL.md](wsl-containers/SKILL.md)
 - **Description**: Native WSL Containers via `wslc.exe` + `Microsoft.WSL.Containers` — man-style CLI flags, sessions, volumes/networks/GPU, and C# API reference (preview 2.9.3+).
 
+### Podman (Linux + Cockpit)
+- **Path**: [podman/SKILL.md](podman/SKILL.md)
+- **Description**: Create, run, exec, compose, and tear down Podman containers; Cockpit `cockpit-podman` UI; rootless defaults; container vs libvirt VM guidance.
+
 ---
 
 ## Special Navigation & Browser Helpers
