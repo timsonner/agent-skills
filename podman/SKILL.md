@@ -1,14 +1,14 @@
 ---
 name: podman
 description: "Use when creating, running, exec'ing, composing, or tearing down Podman containers on this host (incl. Cockpit). Prefer Podman over Docker for new work; never confuse with libvirt VMs."
-version: 1.0.0
+version: 1.1.0
 author: Tim Sonner
 license: MIT
 platforms: [linux]
 metadata:
   hermes:
-    tags: [Podman, containers, Cockpit, compose, devops, OCI]
-    related_skills: [wsl-containers]
+    tags: [Podman, containers, Cockpit, compose, devops, OCI, xrdp, RDP]
+    related_skills: [podman-mcp-manager, container-desktop-rdp, persistent-containers, ladybird-build]
 prerequisites:
   commands: [podman]
 ---
@@ -21,14 +21,14 @@ Manage OCI containers with **Podman** on this Linux host. Day-to-day automation 
 
 Podman runs the same class of images as Docker (OCI / Docker Hub / GHCR) but is a **separate engine**. It does not control the Docker daemon. Rootless is the default preference on this host.
 
-**Typical host context (Ubuntu + Cockpit lab):**
+**This host context (keep current):**
 
 | Stack | Role |
 |-------|------|
 | **Podman** | Preferred for new app containers (agent-managed) |
 | **cockpit-podman** | Containers tab in Cockpit (Podman only) |
 | **Docker** | May still be installed — do not assume shared running state |
-| **libvirt / cockpit-machines** | Full VMs (e.g. Windows guests) — not containers |
+| **libvirt / cockpit-machines** | Full VMs (e.g. `windows-11`) — not containers |
 | **Cockpit URL** | https://localhost:9090 (`cockpit.socket` → port **9090**) |
 
 ## When to Use
@@ -191,18 +191,86 @@ Destroy path: `podman rm` then `podman volume rm APP-data` only if disposable.
 
 ## systemd inside a container
 
-Needed for desktop stacks, xrdp, multi-service “mini VMs”:
+Needed for multi-service “mini VMs” when services expect PID 1 systemd. Prefer a **custom entrypoint** for xrdp (see RDP section) — rootless `--systemd=always` is flaky (`systemctl is-system-running` hangs; dbus zombies).
 
 ```bash
 podman run -d --name arch-sys \
   --systemd=always \
   --hostname arch-sys \
-  -p 3389:3389 \
+  -p 13389:3389 \
   archlinux:latest
-# then install packages via podman exec / build a proper image
 ```
 
-Prefer a purpose-built image over long manual exec sessions when repeating.
+Prefer a purpose-built image + entrypoint over long manual exec sessions when repeating.
+
+## Desktop RDP container (proven on this host)
+
+**Goal:** remote XFCE desktop over RDP into a **persistent** Podman container. Client tested: `wlfreerdp3`.
+
+### Base image choice
+
+| Base | xrdp | Notes |
+|------|------|--------|
+| **Ubuntu 24.04** | `apt install xrdp xorgxrdp` | **Preferred** — packages in universe |
+| **Arch** | AUR only (`xrdp` / `xorgxrdp`) | XFCE via pacman is fine; AUR build is slow/fragile in containers |
+
+Do **not** fight Arch AUR for first RDP — use Ubuntu.
+
+### Persistence pattern (required for durable desktops)
+
+1. Install packages + write `/usr/local/bin/rdp-entrypoint.sh` (starts dbus, xrdp-sesman, xrdp, then `sleep infinity`)
+2. `podman commit` → e.g. `localhost/rdp-xfce:persistent` with `ENTRYPOINT` set
+3. Named volumes: `rdp-home` → `/home/USER`, `rdp-xrdp-etc` → `/etc/xrdp`
+4. Run with `--restart unless-stopped` and high host port (rootless): `-p 13389:3389`
+5. Host: `loginctl enable-linger $USER` so rootless containers return after reboot
+6. Optional note file: `~/Documents/rdp-container.md`
+
+```bash
+podman volume create rdp-home
+podman volume create rdp-xrdp-etc
+podman run -d --name rdp --hostname rdp --restart unless-stopped \
+  -p 13389:3389 \
+  -v rdp-home:/home/tim \
+  -v rdp-xrdp-etc:/etc/xrdp \
+  localhost/rdp-xfce:persistent
+```
+
+**Recreate keeps data** if volumes are kept; only image/entrypoint need reinstall if you `rm -f` without volumes.
+
+### Entrypoint essentials
+
+- `startwm.sh` / `.xsession` → `startxfce4` / `xfce4-session`
+- `unset DBUS_SESSION_BUS_ADDRESS` and `XDG_RUNTIME_DIR` before session (avoids black screen)
+- Start `/usr/sbin/xrdp-sesman --nodaemon` then `/usr/sbin/xrdp --nodaemon` in background; PID 1 = `sleep infinity` (or systemd if it works)
+- Create login user + password inside image **and** ensure volume-mounted `/home` gets `.xsession` on first boot
+
+### Connect
+
+```bash
+wlfreerdp3 /v:127.0.0.1:13389 /u:tim /p:PASSWORD /cert:ignore
+# optional: /size:1920x1080 /network:auto
+```
+
+### Port / concurrency pitfalls (hard lessons)
+
+1. **One host port owner** — only one container may publish `13389`. Arch with `--restart unless-stopped` will **steal the port** after reboot/kill and block `rdp` start (`pasta: Address already in use`).
+2. Fix: `podman update --restart=no OTHER`; `podman stop OTHER`; free pasta with `fuser -k 13389/tcp` if needed; then `podman start rdp`.
+3. **Exit 137** during heavy `apt` is often OOM-kill of the **exec** or cgroup pressure — retry install; host may still show free RAM.
+4. **Stale apt locks** after interrupted installs: clear `/var/lib/dpkg/lock*` inside container, `dpkg --configure -a`, re-run apt.
+5. TCP probe to 3389 is **not** a full RDP handshake — `libxrdp_force_read` errors in logs from `bash /dev/tcp` are expected; use `wlfreerdp3` to validate.
+6. Building large apps (e.g. Ladybird) → put source under the **home volume**; install Qt 6.9+ via `aqtinstall` if distro Qt is &lt; 6.9; use `clang-21` + Kitware CMake ≥ 3.30 (see **ladybird-build** skill).
+
+### This host’s current RDP stack (keep current)
+
+| Item | Value |
+|------|--------|
+| Container | `rdp` |
+| Image | `localhost/rdp-xfce:persistent` |
+| Port | **13389** |
+| Volumes | `rdp-home`, `rdp-xrdp-etc` |
+| Restart | `unless-stopped` |
+| User | `tim` (password set at create time) |
+| Docs | `~/Documents/rdp-container.md` |
 
 ## Cockpit
 
@@ -211,12 +279,14 @@ Prefer a purpose-built image over long manual exec sessions when repeating.
 - UI manages **Podman only** (not Docker, not libvirt)
 - Agent still prefers CLI for automation; mention UI when user is clicking around
 
+Install reference also lives at `~/Documents/cockpit-install.md` on this machine.
+
 ## Decision: container vs VM
 
 | Need | Choose |
 |------|--------|
 | App/service, API, DB, CLI toolchain | **Podman container** |
-| Full desktop + RDP (toy/sandbox) | Container + xrdp **or** VM — prefer VM if persistent daily driver |
+| Full desktop + RDP (toy/sandbox) | **Ubuntu container + xrdp** (persistence pattern); VM if daily driver / GPU |
 | Windows, other kernel, GPU passthrough, nested virt | **libvirt VM** (Cockpit Machines) |
 | Kernel modules, custom kernel | **VM** |
 
@@ -236,6 +306,9 @@ Prefer a purpose-built image over long manual exec sessions when repeating.
 5. **Using `docker` commands out of habit** — only when user wants Docker; default new work to Podman once installed.
 6. **Assuming Arch/Ubuntu container = that distro’s kernel** — always host kernel.
 7. **Force-rm production-looking names without confirm** — if name suggests user data (`*prod*`, `*db*`, `windows*`), confirm scope first. `windows-11` is a **VM**, not a container.
+8. **RDP port stolen by another container’s restart policy** — disable restart on competitors; only one publisher per host port.
+9. **Arch for xrdp** — AUR-only; prefer Ubuntu image for desktop RDP unless user insists on Arch.
+10. **Ephemeral desktop** — packages lost on `rm` without commit/volumes; always use persistence pattern above for RDP.
 
 ## Verification checklist
 
@@ -270,6 +343,16 @@ podman run --rm -it docker.io/library/alpine:latest /bin/sh
 ```bash
 podman stop SERVICE 2>/dev/null; podman rm -f SERVICE
 # optional: podman volume rm SERVICE-data
+```
+
+### Persistent RDP desktop (summary)
+
+```bash
+# after image localhost/rdp-xfce:persistent exists (see Desktop RDP section)
+podman run -d --name rdp --restart unless-stopped -p 13389:3389 \
+  -v rdp-home:/home/tim -v rdp-xrdp-etc:/etc/xrdp \
+  localhost/rdp-xfce:persistent
+wlfreerdp3 /v:127.0.0.1:13389 /u:tim /p:PASSWORD /cert:ignore
 ```
 
 ## Agent completion style
