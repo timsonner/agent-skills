@@ -129,6 +129,15 @@ Guides for configuring, hardening, recovering, and virtualizing systems and cont
 - **Path**: [podman/SKILL.md](podman/SKILL.md)
 - **Description**: Create, run, exec, compose, and tear down Podman containers; Cockpit `cockpit-podman` UI; rootless defaults; container vs libvirt VM guidance.
 
+### Buzz Relay Self-Host
+- **Path**: [buzz-relay-self-host/SKILL.md](buzz-relay-self-host/SKILL.md)
+- **Description**: Self-host Block Buzz (Docker Compose) behind a reverse proxy with WebSockets, closed membership, Desktop vs CLI schemes, and optional Hermes gateway wiring. Placeholder-only; keep site inventory private.
+- **Hermes reference**: [buzz-relay-self-host/references/hermes-gateway.md](buzz-relay-self-host/references/hermes-gateway.md)
+
+### Buzz ↔ Hermes Gateway
+- **Path**: [buzz-hermes-gateway/SKILL.md](buzz-hermes-gateway/SKILL.md)
+- **Description**: Connect Hermes Agent gateway to a Buzz community — dedicated agent key, hex+npub allowlist, systemd env load, mention rules, and “eyes but no reply” authz debugging.
+
 ---
 
 ## Special Navigation & Browser Helpers
