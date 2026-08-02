@@ -179,3 +179,7 @@ In Desktop: **@Agent** in a watched channel (if `require_mention: true`) or DM t
 
 - **Desktop runtime:** laptop Settings → Runtimes → Hermes; keep owner-only tool approval expectations in mind (Buzz may auto-approve shell for owner agents).
 - **buzz-acp:** server-side bridge to `hermes acp` when Buzz owns transport.
+
+## Mobile pairing (out of scope for Hermes)
+
+Human Desktop ↔ phone QR is **not** configured via Hermes. If Desktop Settings → Mobile 404s on `/pair`, fix the **relay** sidecar — see `references/mobile-pairing.md`.

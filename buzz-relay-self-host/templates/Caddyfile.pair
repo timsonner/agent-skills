@@ -1,0 +1,10 @@
+# Fronts relay + pair on one host port for external reverse proxies (Pangolin/etc).
+# TLS terminates upstream. Map host :3000 → container :80.
+:80 {
+	handle /pair* {
+		reverse_proxy pair:5000
+	}
+	handle {
+		reverse_proxy relay:3000
+	}
+}

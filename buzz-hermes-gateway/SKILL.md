@@ -173,8 +173,12 @@ Cron / home delivery: `deliver=buzz` uses `home_channel`.
 - Never paste nsec / private keys into chat or public skills
 - Site inventory (FQDN, UUIDs, pubkeys) stays in a private runbook
 
+## Mobile pairing
+
+Not a Hermes gateway task. Desktop QR / `/pair` 404 → deploy `buzz-pair-relay` on the **Buzz relay** host. See sibling skill `buzz-relay-self-host` → `references/mobile-pairing.md`.
+
 ## See also
 
-- `buzz-relay-self-host` — relay compose, reverse proxy, Desktop onboarding
+- `buzz-relay-self-host` — relay compose, reverse proxy, Desktop onboarding, mobile pairing
 - `buzz-relay-self-host/references/hermes-gateway.md` — expanded wiring table
 - https://hermes-agent.nousresearch.com/docs/user-guide/messaging/buzz

@@ -131,8 +131,9 @@ Guides for configuring, hardening, recovering, and virtualizing systems and cont
 
 ### Buzz Relay Self-Host
 - **Path**: [buzz-relay-self-host/SKILL.md](buzz-relay-self-host/SKILL.md)
-- **Description**: Self-host Block Buzz (Docker Compose) behind a reverse proxy with WebSockets, closed membership, Desktop vs CLI schemes, and optional Hermes gateway wiring. Placeholder-only; keep site inventory private.
+- **Description**: Self-host Block Buzz (Docker Compose) behind a reverse proxy with WebSockets, closed membership, Desktop vs CLI schemes, mobile pairing (`/pair` sidecar), and optional Hermes gateway wiring. Placeholder-only; keep site inventory private.
 - **Hermes reference**: [buzz-relay-self-host/references/hermes-gateway.md](buzz-relay-self-host/references/hermes-gateway.md)
+- **Mobile pairing**: [buzz-relay-self-host/references/mobile-pairing.md](buzz-relay-self-host/references/mobile-pairing.md)
 
 ### Buzz ↔ Hermes Gateway
 - **Path**: [buzz-hermes-gateway/SKILL.md](buzz-hermes-gateway/SKILL.md)

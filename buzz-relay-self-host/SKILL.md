@@ -1,7 +1,7 @@
 ---
 name: buzz-relay-self-host
-description: "Use when self-hosting Block Buzz relay (Docker Compose) behind a reverse proxy, or wiring Hermes gateway as a community member."
-version: 1.0.0
+description: "Use when self-hosting Block Buzz (compose/proxy), mobile pairing /pair 404, or Hermes gateway wiring."
+version: 1.1.0
 author: Tim Sonner
 license: MIT
 platforms: [linux]
@@ -146,6 +146,31 @@ Bare `buzz` printing JSON help is normal — that is not the GUI.
 3. Join URL exactly: `wss://buzz.example.com` (no path, no trailing slash, not `https://`).
 4. **"Need invite"** on a closed relay = pubkey not on roster → `add-member`, then retry join / restart Desktop.
 
+## Mobile pairing (Desktop QR → phone)
+
+**Class of failure:** Desktop Settings → Mobile shows WebSocket **404** on `/pair` while the community relay is otherwise healthy (NIP-11 lists NIP-43, no `pairing_relay_url`).
+
+| Truth | Detail |
+|-------|--------|
+| Cause | Main `buzz-relay` does **not** serve pairing; need `buzz-pair-relay` sidecar + advertisement |
+| QR source | **Buzz Desktop only** (NIP-AB). Never mint QR from Hermes/agent/owner secrets |
+| Hermes | Unrelated to human phone pairing |
+
+**Preferred fix (self-host):** pair sidecar + path-proxy `/pair` on the same host port your reverse proxy already targets, plus:
+
+```env
+BUZZ_PAIRING_RELAY_URL=wss://<buzz-fqdn>/pair
+```
+
+**Quick workaround:** `BUZZ_PAIRING_RELAY_URL=wss://pairing.buzz.xyz` on the main relay only.
+
+Full recipe, compose fragment, Caddyfile, verify script:
+
+- `references/mobile-pairing.md`
+- `templates/compose-pair-edge.fragment.yml`
+- `templates/Caddyfile.pair`
+- `scripts/verify-pair-endpoint.sh https://<buzz-fqdn>`
+
 ## Hermes integration (after relay healthy)
 
 | Mode | When |
@@ -192,6 +217,7 @@ cd /path/to/buzz/deploy/compose
 
 ## Pitfalls
 
+- **Mobile pairing QR 404 on `/pair`** → main `buzz-relay` does not serve pairing. Run `buzz-pair-relay` sidecar, path-proxy `/pair` (or subdomain), set `BUZZ_PAIRING_RELAY_URL=wss://<fqdn>/pair` so NIP-11 advertises `pairing_relay_url`. Verify WS upgrade returns **101**. Workaround: `wss://pairing.buzz.xyz`. QR is still generated in **Desktop**, not by Hermes/CLI. See `references/mobile-pairing.md`.
 - **Human Desktop key reused as agent identity** → `BUZZ_PRIVATE_KEY` must be a dedicated agent secret, not the human Desktop nsec. Allowlist = human *public* hex/npub (who may talk). Verify with `buzz users get` (agent name/pubkey, not human). See `references/hermes-gateway.md`.
 
 - **`buzz` CLI mistaken for Desktop** → JSON usage help; install/open the GUI package.
@@ -220,7 +246,11 @@ Keep a **private** runbook next to the deploy with:
 
 ## References
 
+- `references/mobile-pairing.md` — Desktop QR / `/pair` 404 fix (sidecar + NIP-11)
+- `templates/` + `scripts/verify-pair-endpoint.sh` — deploy fragments and checks
 - `references/hermes-gateway.md` — native Hermes gateway wiring (placeholders only)
 - Upstream blog: https://engineering.block.xyz/blog/run-your-own-buzz-relay
+- Mobile pairing background: https://engineering.block.xyz/blog/a-buzz-on-your-phone
 - Hermes messaging: https://hermes-agent.nousresearch.com/docs/user-guide/messaging/buzz
 - Repo: https://github.com/block/buzz
+- Issue class: https://github.com/block/buzz/issues/2734
