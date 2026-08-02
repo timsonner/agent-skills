@@ -192,6 +192,8 @@ cd /path/to/buzz/deploy/compose
 
 ## Pitfalls
 
+- **Human Desktop key reused as agent identity** → `BUZZ_PRIVATE_KEY` must be a dedicated agent secret, not the human Desktop nsec. Allowlist = human *public* hex/npub (who may talk). Verify with `buzz users get` (agent name/pubkey, not human). See `references/hermes-gateway.md`.
+
 - **`buzz` CLI mistaken for Desktop** → JSON usage help; install/open the GUI package.
 - **Temporary LAN `ws://` then public `wss://`** → different communities; set public `RELAY_URL` before real onboarding.
 - **Caddy + external TLS double-termination** → skip compose Caddy behind the edge proxy.

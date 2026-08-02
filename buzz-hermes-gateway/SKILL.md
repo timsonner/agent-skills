@@ -31,6 +31,18 @@ Hermes gateway        ─┘         → relay :3000 → Postgres/Redis/MinIO
 - Desktop joins with **`wss://<buzz-fqdn>`**.
 - Same host; different schemes by client type.
 
+
+## Identity separation
+
+| | Operator (human) | Agent (Hermes) |
+|--|------------------|----------------|
+| Purpose | Talks *to* the bot | *Is* the bot in channels |
+| Secret | Stays in Desktop only | `BUZZ_PRIVATE_KEY` |
+| Public id | On `allowed_users` | Member of relay; posts as this pubkey |
+
+Never put the human Desktop private key in `BUZZ_PRIVATE_KEY`.  
+Quick check: `buzz users get` must show the agent profile, not the human.
+
 ## Prerequisites
 
 1. Relay publicly healthy: `curl -fsS https://<buzz-fqdn>/_liveness`
@@ -144,7 +156,7 @@ Cron / home delivery: `deliver=buzz` uses `home_channel`.
 
 ## Pitfalls
 
-- Human Desktop key reused as agent identity
+- **Human Desktop key reused as agent identity** → `BUZZ_PRIVATE_KEY` must be a dedicated agent secret, not the human Desktop nsec. Allowlist = human *public* hex/npub (who may talk). Verify with `buzz users get` (agent name/pubkey, not human). See `references/hermes-gateway.md`.
 - npub-only allowlist without hex
 - `.env` not loaded by systemd unit
 - `reload` instead of process recycle after env edits

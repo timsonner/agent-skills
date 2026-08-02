@@ -10,6 +10,45 @@ Sanitized wiring checklist. Replace every `<placeholder>`. Do not commit real ke
 - Hermes build with `plugins/platforms/buzz/`
 - Dedicated agent Nostr keypair (member of the relay)
 
+
+## Identity separation (critical)
+
+Two different keypairs:
+
+| Role | What it is | Where it lives |
+|------|------------|----------------|
+| **Operator (Desktop)** | Human who talks *to* the agent | Desktop only; **public** hex/npub on allowlist |
+| **Agent (gateway)** | Who the bot *is* when posting | `BUZZ_PRIVATE_KEY` only — dedicated key |
+
+**Wrong:** put the human Desktop nsec/hex secret into `BUZZ_PRIVATE_KEY` → gateway posts *as you*.  
+**Right:** mint a new agent key; allowlist stays the human **public** ids.
+
+### Verify (no secrets printed)
+
+```bash
+# Who is the CLI/gateway identity right now?
+buzz users get
+# expect agent display_name + agent pubkey — NOT your Desktop display name
+
+# Cryptographic check: private key must derive to the agent pubkey you recorded
+python3 - <<'PY'
+from pathlib import Path
+from coincurve import PrivateKey
+env = dict(
+    l.split("=", 1)
+    for l in Path.home().joinpath(".hermes/.env").read_text().splitlines()
+    if l.startswith("BUZZ_PRIVATE_KEY=")
+)
+sk = env["BUZZ_PRIVATE_KEY"].strip().strip('"')
+derived = PrivateKey(bytes.fromhex(sk)).public_key.format(compressed=True)[1:].hex()
+print("gateway_identity_pubkey", derived)
+# Compare to the agent pubkey you saved at mint time — must match
+# Must NOT equal your Desktop public hex
+PY
+```
+
+If `buzz users get` shows your human profile, rotate: generate new agent key → `add-member` → update `BUZZ_PRIVATE_KEY` → recycle gateway.
+
 ## 1. Agent identity
 
 ```bash
