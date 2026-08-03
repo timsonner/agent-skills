@@ -177,8 +177,18 @@ Cron / home delivery: `deliver=buzz` uses `home_channel`.
 
 Not a Hermes gateway task. Desktop QR / `/pair` 404 → deploy `buzz-pair-relay` on the **Buzz relay** host. See sibling skill `buzz-relay-self-host` → `references/mobile-pairing.md`.
 
+## Agent avatar / profile
+
+```bash
+# BUZZ_* = agent identity
+AVATAR_URL="$(buzz upload file --file /path/to/avatar.png | python3 -c 'import sys,json; print(json.load(sys.stdin)["url"])')"
+buzz users set-profile --name <AgentDisplayName> --avatar "$AVATAR_URL"
+```
+
+Details: `buzz-relay-self-host/references/agent-profile-avatar.md`.
+
 ## See also
 
-- `buzz-relay-self-host` — relay compose, reverse proxy, Desktop onboarding, mobile pairing
+- `buzz-relay-self-host` — relay compose, reverse proxy, Desktop onboarding, mobile pairing, avatars
 - `buzz-relay-self-host/references/hermes-gateway.md` — expanded wiring table
 - https://hermes-agent.nousresearch.com/docs/user-guide/messaging/buzz

@@ -73,6 +73,26 @@ buzz channels join --channel <channel-uuid>
 buzz users set-profile --name <AgentDisplayName>
 ```
 
+### Agent avatar
+
+`--avatar` needs a **URL**. Upload to relay Blossom, then set profile:
+
+```bash
+# e.g. Nous mark from a Hermes install:
+# /usr/local/lib/hermes-agent/website/static/img/nous-logo.png
+AVATAR_URL="$(
+  buzz upload file --file /path/to/avatar.png \
+    | python3 -c 'import sys,json; print(json.load(sys.stdin)["url"])'
+)"
+buzz users set-profile \
+  --name <AgentDisplayName> \
+  --about '<short bio>' \
+  --avatar "$AVATAR_URL"
+buzz users get   # expect picture URL
+```
+
+Helper: `scripts/set-agent-avatar.sh` · full notes: `references/agent-profile-avatar.md`.
+
 ## 2. Hermes config (`~/.hermes/config.yaml`)
 
 ```yaml

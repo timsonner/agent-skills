@@ -190,7 +190,7 @@ Details for mode ③: `references/hermes-gateway.md`.
    # install binary onto gateway host PATH, e.g. /usr/local/bin/buzz
    ```
 3. Mint a **dedicated agent** keypair — not the human Desktop key, not `BUZZ_RELAY_PRIVATE_KEY`.
-4. `./run.sh add-member <agent-pub> --role member`; join watched channels; optional profile name.
+4. `./run.sh add-member <agent-pub> --role member`; join watched channels; set profile/avatar (`references/agent-profile-avatar.md`).
 5. Put secrets in `~/.hermes/.env` **and ensure the gateway unit loads that file** (see reference).
 6. Allowlist operators with **hex and npub** (deny logs show hex).
 7. Restart gateway **outside** an in-gateway agent tool session (self-restart is often blocked).
@@ -247,7 +247,8 @@ Keep a **private** runbook next to the deploy with:
 ## References
 
 - `references/mobile-pairing.md` — Desktop QR / `/pair` 404 fix (sidecar + NIP-11)
-- `templates/` + `scripts/verify-pair-endpoint.sh` — deploy fragments and checks
+- `references/agent-profile-avatar.md` — agent display name + Blossom avatar
+- `templates/` + `scripts/verify-pair-endpoint.sh` + `scripts/set-agent-avatar.sh`
 - `references/hermes-gateway.md` — native Hermes gateway wiring (placeholders only)
 - Upstream blog: https://engineering.block.xyz/blog/run-your-own-buzz-relay
 - Mobile pairing background: https://engineering.block.xyz/blog/a-buzz-on-your-phone
