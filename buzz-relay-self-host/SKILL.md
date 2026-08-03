@@ -1,13 +1,13 @@
 ---
 name: buzz-relay-self-host
-description: "Use when self-hosting Block Buzz (compose/proxy), mobile pairing /pair 404, or Hermes gateway wiring."
-version: 1.1.0
+description: "Use when self-hosting Block Buzz, mobile pairing, Hermes gateway, or always-on buzz-acp agents."
+version: 1.2.0
 author: Tim Sonner
 license: MIT
 platforms: [linux]
 metadata:
   hermes:
-    tags: [buzz, nostr, relay, self-host, docker, proxmox, reverse-proxy, hermes-gateway, messaging]
+    tags: [buzz, nostr, relay, self-host, docker, proxmox, reverse-proxy, hermes-gateway, buzz-acp, messaging]
     related_skills: [proxmox-system-administration, hermes-agent]
 ---
 
@@ -171,6 +171,21 @@ Full recipe, compose fragment, Caddyfile, verify script:
 - `templates/Caddyfile.pair`
 - `scripts/verify-pair-endpoint.sh https://<buzz-fqdn>`
 
+## Always-on ACP agents (buzz-acp bridge)
+
+For ACP agents that stay online without Buzz Desktop (Hermes ACP, Copilot CLI ACP, goose, …):
+
+1. Mint a **dedicated** agent key (not gateway adapter key, not human Desktop key).
+2. `add-member` + join channels + descriptive `set-profile` / avatar.
+3. Run `buzz-acp` under systemd with `BUZZ_ACP_AGENT_COMMAND` / `ARGS` / optional `BUZZ_ACP_MODEL`.
+4. Prefer **`BUZZ_ACP_RESPOND_TO=owner-only`** (headless tools often auto-approve).
+
+Discover models: `buzz-acp models` (catalog depends on the ACP backend — Copilot ≠ Nous).
+
+Full recipe: `references/buzz-acp-bridge.md`.
+
+Native gateway (mode ③) remains the deepest Hermes integration for memory/cron/multi-platform.
+
 ## Hermes integration (after relay healthy)
 
 | Mode | When |
@@ -218,6 +233,9 @@ cd /path/to/buzz/deploy/compose
 ## Pitfalls
 
 - **Mobile pairing QR 404 on `/pair`** → main `buzz-relay` does not serve pairing. Run `buzz-pair-relay` sidecar, path-proxy `/pair` (or subdomain), set `BUZZ_PAIRING_RELAY_URL=wss://<fqdn>/pair` so NIP-11 advertises `pairing_relay_url`. Verify WS upgrade returns **101**. Workaround: `wss://pairing.buzz.xyz`. QR is still generated in **Desktop**, not by Hermes/CLI. See `references/mobile-pairing.md`.
+- **Reuse gateway agent key for buzz-acp** → identity lock / two harnesses fighting one pubkey. Mint a new key per always-on ACP agent.
+- **Expect Nous-only model IDs on Copilot ACP** → catalogs differ; query `buzz-acp models` for the configured agent binary.
+- **Avatar upload 422 metadata** → strip PNG metadata (Pillow re-encode) before `buzz upload file`. See `references/agent-profile-avatar.md`.
 - **Human Desktop key reused as agent identity** → `BUZZ_PRIVATE_KEY` must be a dedicated agent secret, not the human Desktop nsec. Allowlist = human *public* hex/npub (who may talk). Verify with `buzz users get` (agent name/pubkey, not human). See `references/hermes-gateway.md`.
 
 - **`buzz` CLI mistaken for Desktop** → JSON usage help; install/open the GUI package.
@@ -247,11 +265,15 @@ Keep a **private** runbook next to the deploy with:
 ## References
 
 - `references/mobile-pairing.md` — Desktop QR / `/pair` 404 fix (sidecar + NIP-11)
-- `references/agent-profile-avatar.md` — agent display name + Blossom avatar
+- `references/buzz-acp-bridge.md` — always-on ACP agents (Hermes ACP, Copilot ACP, …)
+- `references/agent-profile-avatar.md` — agent display name + Blossom avatar (+ metadata strip)
 - `templates/` + `scripts/verify-pair-endpoint.sh` + `scripts/set-agent-avatar.sh`
 - `references/hermes-gateway.md` — native Hermes gateway wiring (placeholders only)
 - Upstream blog: https://engineering.block.xyz/blog/run-your-own-buzz-relay
 - Mobile pairing background: https://engineering.block.xyz/blog/a-buzz-on-your-phone
 - Hermes messaging: https://hermes-agent.nousresearch.com/docs/user-guide/messaging/buzz
+- Hermes Buzz modes: https://hermes-agent.nousresearch.com/docs/integrations/buzz
+- buzz-acp: https://github.com/block/buzz/tree/main/crates/buzz-acp
+- Copilot ACP: https://docs.github.com/en/copilot/reference/copilot-cli-reference/acp-server
 - Repo: https://github.com/block/buzz
 - Issue class: https://github.com/block/buzz/issues/2734

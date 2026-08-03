@@ -180,15 +180,19 @@ Not a Hermes gateway task. Desktop QR / `/pair` 404 → deploy `buzz-pair-relay`
 ## Agent avatar / profile
 
 ```bash
-# BUZZ_* = agent identity
-AVATAR_URL="$(buzz upload file --file /path/to/avatar.png | python3 -c 'import sys,json; print(json.load(sys.stdin)["url"])')"
+# BUZZ_* = agent identity; strip PNG metadata if upload 422s
+AVATAR_URL="$(buzz upload file --file /tmp/avatar-clean.png | python3 -c 'import sys,json; print(json.load(sys.stdin)["url"])')"
 buzz users set-profile --name <AgentDisplayName> --avatar "$AVATAR_URL"
 ```
 
 Details: `buzz-relay-self-host/references/agent-profile-avatar.md`.
 
+## Always-on ACP (server)
+
+For agents that stay online without Desktop, use **buzz-acp** + a dedicated key + `hermes acp` or `copilot --acp --stdio`. See `buzz-relay-self-host/references/buzz-acp-bridge.md`. Do not reuse the native gateway agent key.
+
 ## See also
 
-- `buzz-relay-self-host` — relay compose, reverse proxy, Desktop onboarding, mobile pairing, avatars
+- `buzz-relay-self-host` — relay compose, reverse proxy, Desktop onboarding, mobile pairing, avatars, buzz-acp
 - `buzz-relay-self-host/references/hermes-gateway.md` — expanded wiring table
 - https://hermes-agent.nousresearch.com/docs/user-guide/messaging/buzz
