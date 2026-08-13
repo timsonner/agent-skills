@@ -11,7 +11,9 @@ Welcome to the Agent Skills Repository! This workspace houses a large collection
 - [OpenCode Platform Skills](#opencode-platform-skills)
 - [Penetration Testing Suite](#penetration-testing-suite)
 - [System Administration & Virtualization](#system-administration--virtualization)
+- [Agent workstation drive (start here)](#agent-workstation-drive-start-here)
 - [Special Navigation & Browser Helpers](#special-navigation--browser-helpers)
+- [Remote Desktop (Linux)](#remote-desktop-linux)
 
 ---
 
@@ -143,15 +145,43 @@ Guides for configuring, hardening, recovering, and virtualizing systems and cont
 
 ---
 
+## Agent workstation drive (start here)
+
+**Empower agents with a full operator loop:** container desktop + RDP + Windows GUI drive.
+
+| Piece | Path |
+|---|---|
+| **Entry skill** | [agent-workstation-drive/SKILL.md](agent-workstation-drive/SKILL.md) |
+| Harness install (Grok / Claude / Cursor / …) | [agent-workstation-drive/references/harness-install.md](agent-workstation-drive/references/harness-install.md) |
+| First-session prompt | [agent-workstation-drive/references/first-session-prompt.md](agent-workstation-drive/references/first-session-prompt.md) |
+| Cross-harness `AGENTS.md` | [AGENTS.md](AGENTS.md) |
+| Server (GNOME Wayland + GRD) | [gnome-wayland-rdp/](gnome-wayland-rdp/) |
+| Client (mstsc + user32) | [browser-read-bypass/](browser-read-bypass/) + `scripts/Invoke-MstscConnect.ps1` |
+
+A new agent that loads **`agent-workstation-drive`** should meet the skill’s five success criteria without prior session memory.
+
+---
+
 ## Special Navigation & Browser Helpers
 
 Workarounds and tools for when models encounter unique terminal limits or application rendering blocks.
 
-### Browser Read Bypass
+### Browser Read Bypass (Windows UI input)
 - **Path**: [browser-read-bypass/SKILL.md](browser-read-bypass/SKILL.md)
-- **Description**: Workaround for browser-interaction blocks (e.g., tier "read-only") inside Chrome/Edge. Injects clicks and raw keyboard inputs at the Windows API layer using PowerShell, `user32.dll`, and `System.Windows.Forms`.
+- **Description**: Inject clicks and keystrokes on Windows via PowerShell/`user32` when computer-use is screenshot-only. Covers Edge/Chrome/Firefox under tier "read" **and** mstsc RDP client dialogs (Connect vs Learn more, PID-scoped windows, CredUI limits, cmdkey seeding). Portable script: `scripts/Invoke-MstscConnect.ps1`.
 
 ### Canvas Browser Reading
 - **Path**: [read-canvas-browser/SKILL.md](read-canvas-browser/SKILL.md)
 - **Description**: Specialized visual interaction guidelines to handle canvas-rendered or WebGL-driven web pages where standard HTML DOM tree and accessibility engines return blank nodes.
+
+---
+
+## Remote Desktop (Linux)
+
+### GNOME Wayland headless RDP (GRD)
+- **Path**: [gnome-wayland-rdp/SKILL.md](gnome-wayland-rdp/SKILL.md)
+- **Description**: GDM/GNOME-native remote path — `gnome-shell --wayland --headless` + `gnome-remote-desktop` (not xrdp). Session bus, PipeWire, FUSE clipboard aborts, dual-head promote, black-screen triage. Scripts under `gnome-wayland-rdp/scripts/`. Pair with **browser-read-bypass** and entry skill **agent-workstation-drive**.
+
+### Linux desktop + xrdp (X11)
+- Prefer the user Grok skill **`linux-desktop-rdp-container`** (`~/.grok/skills/`) for XFCE/Plasma + xrdp OCI images. Do not use that path as a substitute for GNOME Shell 50 Wayland.
 
