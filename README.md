@@ -1,178 +1,128 @@
 # Agent Skills Repository
 
-Welcome to the Agent Skills Repository! This workspace houses a large collection of automated agent skills, systems administration workflows, security penetration testing manuals, and developer SDK configurations. These skills are designed to equip AI models and developers with structured, reusable, and reproducible capabilities.
+Structured, reusable skills for AI coding agents and harnesses (Grok, Claude Code, Cursor, OpenCode, and similar). Clone this repo, point the harness at it (or copy skills in), and agents can load capabilities without prior session memory.
+
+```bash
+git clone https://github.com/timsonner/agent-skills.git
+```
+
+**Cross-harness bootstrap:** [AGENTS.md](AGENTS.md)
 
 ---
 
 ## Table of Contents
 
+- [Agent workstation drive (start here for GUI agency)](#agent-workstation-drive-start-here-for-gui-agency)
 - [AI & Agent Harnesses](#ai--agent-harnesses)
 - [Developer SDKs & Protocols](#developer-sdks--protocols)
-- [OpenCode Platform Skills](#opencode-platform-skills)
-- [Penetration Testing Suite](#penetration-testing-suite)
 - [System Administration & Virtualization](#system-administration--virtualization)
-- [Agent workstation drive (start here)](#agent-workstation-drive-start-here)
 - [Special Navigation & Browser Helpers](#special-navigation--browser-helpers)
 - [Remote Desktop (Linux)](#remote-desktop-linux)
+- [OpenCode Platform Skills](#opencode-platform-skills)
+- [Penetration Testing Suite](#penetration-testing-suite)
+- [Other skills](#other-skills)
+
+---
+
+## Agent workstation drive (start here for GUI agency)
+
+**Intent:** any agent that can clone this repository and run a Windows shell can learn a full **operator loop** — container desktop + RDP + GUI drive — without private session lore.
+
+```text
+clone agent-skills
+  → load agent-workstation-drive
+  → (optional) Install-ToHarness.ps1 or skills.paths = clone
+  → point at a GNOME/GRD image project the user provides
+  → connect with Invoke-MstscConnect.ps1
+  → drive via screenshots + user32 injection
+```
+
+| Piece | Path |
+|---|---|
+| **Entry skill** | [agent-workstation-drive/SKILL.md](agent-workstation-drive/SKILL.md) |
+| First-session prompt | [agent-workstation-drive/references/first-session-prompt.md](agent-workstation-drive/references/first-session-prompt.md) |
+| Harness install (Grok / Claude / Cursor) | [agent-workstation-drive/references/harness-install.md](agent-workstation-drive/references/harness-install.md) |
+| Install script | [agent-workstation-drive/scripts/Install-ToHarness.ps1](agent-workstation-drive/scripts/Install-ToHarness.ps1) |
+| Server skill (GNOME Wayland + GRD) | [gnome-wayland-rdp/](gnome-wayland-rdp/) |
+| Client skill (mstsc + user32) | [browser-read-bypass/](browser-read-bypass/) |
+| Portable mstsc helper | [browser-read-bypass/scripts/Invoke-MstscConnect.ps1](browser-read-bypass/scripts/Invoke-MstscConnect.ps1) |
+| Cross-harness notes | [AGENTS.md](AGENTS.md) |
+
+**In this repo:** skills, scripts (promote monitor, desktop UI, FUSE stub sources, mstsc connect), install docs.  
+**Not in this repo:** a full GNOME container image/Dockerfile — supply a lab image project separately (skills stay portable: no hard-coded host/port).
+
+Success bar for a new agent: the five criteria in `agent-workstation-drive` (restart desktop stack from docs, open mstsc without human clicks, show an app or full desktop in a screenshot, know which logs to read, no secrets baked into skills).
 
 ---
 
 ## AI & Agent Harnesses
 
-These skills define interaction workflows for launching and managing AI coding agents and harness setups inside a terminal or PTY session.
+Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 
 ### Antigravity (Gemini) CLI Harness
 - **Path**: [agy-harness/SKILL.md](agy-harness/SKILL.md)
-- **Description**: Launch and control the Gemini / Antigravity CLI harness (`agy`) over a persistent terminal/PTY session, utilizing artifact picking, slash commands, configurations, and reliable exit control.
+- **Description**: Launch and control the Gemini / Antigravity CLI harness (`agy`) over a persistent terminal/PTY session (artifacts, slash commands, exit control).
 
 ### OpenCode CLI Harness
 - **Path**: [opencode-harness/SKILL.md](opencode-harness/SKILL.md)
-- **Description**: Drive the OpenCode CLI harness (`opencode`) programmatically across terminal sessions for automated, interactive coding tasks using PTY-backed control.
+- **Description**: Drive the OpenCode CLI (`opencode`) programmatically across terminal sessions with PTY-backed control.
 
 ### Ralph Wiggum Pattern
 - **Path**: [ralph-wiggum-pattern/SKILL.md](ralph-wiggum-pattern/SKILL.md)
-- **Description**: Execute a continuous feedback-loop coding setup. Employs iterating on single items, delegating implementation authority to the agent, and self-healing mechanisms.
+- **Description**: Continuous feedback-loop coding: iterate on single items, delegate implementation, self-heal.
 
 ---
 
 ## Developer SDKs & Protocols
 
-Guidelines and frameworks for integrating directly with AI agent platforms and protocols.
-
 ### GitHub Copilot Python SDK
 - **Path**: [copilot-sdk/SKILL.md](copilot-sdk/SKILL.md)
-- **Description**: Integrate programmatically with the GitHub Copilot CLI via a Python JSON-RPC SDK in technical preview.
+- **Description**: Integrate with the GitHub Copilot CLI via a Python JSON-RPC SDK (technical preview).
 
-### Model Context Protocol (MCP) Server Specification
+### Model Context Protocol (MCP) Server
 - **Path**: [mcp-server/SKILL.md](mcp-server/SKILL.md)
-- **Description**: Learn how to build standard, production-ready MCP servers using Python. Focuses on exposing resources, tools, prompts, and handling stdio safely without writing raw stdout.
-
----
-
-## OpenCode Platform Skills
-
-An extensive and highly segmented guide collection for learning, installing, configuring, and customize the OpenCode platform.
-
-### Quick Start & Installation
-- **Intro Specification**: [opencode/intro/SKILL.md](opencode/intro/SKILL.md) — Fundamental overview of what OpenCode is and how to get started.
-- **Prerequisites Guide**: [opencode/prerequisites/SKILL.md](opencode/prerequisites/SKILL.md) — Software pre-requirements, terminal choices, and initial API key configs.
-- **Platform Installation**: [opencode/install/SKILL.md](opencode/install/SKILL.md) — Multiple deployment and installation methods (scripts, npm/Node.js, Homebrew, Arch Linux, and Windows).
-- **Windows Implementation**: [opencode/windows/SKILL.md](opencode/windows/SKILL.md) — Specific guidelines and setups for installing and optimizing OpenCode on Windows systems natively or utilizing WSL.
-
-### Project Onboarding & Setup
-- **Initialization Guide**: [opencode/initialize/SKILL.md](opencode/initialize/SKILL.md) — Preparing folders for OpenCode development and setting up custom agents.
-- **General Configuration**: [opencode/configure-guide/SKILL.md](opencode/configure-guide/SKILL.md) — Setting up language models and passing correct keys.
-- **Provider Setup**: [opencode/providers/SKILL.md](opencode/providers/SKILL.md) — Detailed specifications for major LLM providers.
-
-### Personalization & Growth
-- **Customization Guide**: [opencode/customize/SKILL.md](opencode/customize/SKILL.md) — Adjusting UI themes, configuring keyboard mapping, formatting configurations, and custom commands.
-- **Skill Creation**: [opencode/skill-creation/SKILL.md](opencode/skill-creation/SKILL.md) — Standardized guidelines for creating new OpenCode-compatible skills.
-- **Plugins Engine**: [opencode/plugins/SKILL.md](opencode/plugins/SKILL.md) — Searching, introducing, and testing extensions and plugins in OpenCode.
-
-### Network, Servers & Teams
-- **Network Configuration**: [opencode/network/SKILL.md](opencode/network/SKILL.md) — Handling proxies, offline environments, and network troubleshooting.
-- **Server Deployment**: [opencode/server/SKILL.md](opencode/server/SKILL.md) — Setting up a dedicated OpenCode Server for API-based team integrations and webhooks.
-- **Enterprise Settings**: [opencode/enterprise/SKILL.md](opencode/enterprise/SKILL.md) — Hardened multi-tenant workflows, access-control patterns, and advanced corporate deployments.
-- **Ecosystem Integration**: [opencode/ecosystem/SKILL.md](opencode/ecosystem/SKILL.md) — Community ecosystems and linking third-party tooling with OpenCode.
-- **Sharing Output**: [opencode/share/SKILL.md](opencode/share/SKILL.md) — Sharing chat sessions, histories, and collaborative flows with team members.
-
-### Technical Deep Dives
-- **Agent Roles**: [opencode/configure/agents/SKILL.md](opencode/configure/agents/SKILL.md) — Aligning specific prompts and persona-based capabilities.
-- **LSP Integrations**: [opencode/configure/lsp/SKILL.md](opencode/configure/lsp/SKILL.md) — Customizing the Language Server Protocol configurations.
-- **Code Formatters**: [opencode/configure/formatters/SKILL.md](opencode/configure/formatters/SKILL.md) — Injecting autoformat, linters, and checkers (Prettier, Black, etc.).
-- **Go Support**: [opencode/go/SKILL.md](opencode/go/SKILL.md) — Specific best practices and optimizations for writing Go applications.
-- **Workflow - Adding Features**: [opencode/usage/add-features/SKILL.md](opencode/usage/add-features/SKILL.md) — Complete execution workflow for creating new features sustainably.
-
----
-
-## Penetration Testing Suite
-
-A suite of highly granular guides and references for conducting authorized cybersecurity assessments, vulnerability scanning, and red team engagements.
-
-### Core Manuals & Methodology
-- **General Methodology**: [pentest/pentesting-methodology-guide.md](pentest/pentesting-methodology-guide.md) — Clean, PTES/OWASP-aligned high-level processes and safety principles.
-- **Kali Linux Execution Guide**: [pentest/methodology/SKILL.md](pentest/methodology/SKILL.md) — Concrete step-by-step phases of discovery, scan, leverage, elevation, and report using standard tool structures.
-- **Attack Payload Book**: [pentest/attack-patterns/SKILL.md](pentest/attack-patterns/SKILL.md) — Ready-to-go reference recipes for common vulnerabilities, including Web (LFI, XXE, SSRF, XSS), Command Injection, SQL Injection, Windows Exploitation, and Reverse Shells.
-- **Defender OPSEC Hardening**: [defender-opsec/SKILL.md](defender-opsec/SKILL.md) — Harden Windows Defender privacy settings for authorized pentest engagements, disabling background telemetry, automatic sample submissions, and cloud protection to preserve confidentiality.
-- **WSLC Pentest Workflow**: [wslc-pentest-workflow/SKILL.md](wslc-pentest-workflow/SKILL.md) — Run authorized pentest workflows inside persistent WSL containers (`wslc`), isolating tooling, mapping actions to methodology, and saving persistent artifacts to the host.
-
-### Pentest Tools Directory
-The repository defines over 90 distinct penetration testing tool sub-skills. The main entry point is [pentest/tools/SKILL.md](pentest/tools/SKILL.md), which is supplemented by highly detailed, individual tool guidelines:
-- **Port/Service Scanners**: [pentest/tools/nmap/SKILL.md](pentest/tools/nmap/SKILL.md) (Nmap for active recon and port scanning)
-- **Vulnerability Scanner**: [pentest/tools/nuclei/SKILL.md](pentest/tools/nuclei/SKILL.md) (Nuclei scanning for fast templated-based discovery)
-- **Directory Discovery**: [pentest/tools/dirsearch/SKILL.md](pentest/tools/dirsearch/SKILL.md) (Brute-forcing hidden directories and web paths)
-- **Web App Analysis**: [pentest/tools/burp-suite/SKILL.md](pentest/tools/burp-suite/SKILL.md) (Burp Suite for interception and manual analysis)
-- **Active Directory Mapping**: [pentest/tools/bloodhound/SKILL.md](pentest/tools/bloodhound/SKILL.md) (BloodHound domain relationships and privilege path visualizations)
-- **Memory/Credential Harvesting**: [pentest/tools/mimikatz/SKILL.md](pentest/tools/mimikatz/SKILL.md) (Mimikatz usage for LSASS extraction and token analysis)
-- **Network Helpers**: [pentest/tools/netcat/SKILL.md](pentest/tools/netcat/SKILL.md) (Netcat data transfers and socket testing)
-- **Secure Tunneling**: [pentest/tools/chisel/SKILL.md](pentest/tools/chisel/SKILL.md) (Chisel TCP/UDP tunneling and reverse port forwards)
-
-*And many dozens of others listed under the nested `pentest/tools/` subdirectories.*
+- **Description**: Build production-style MCP servers in Python (resources, tools, prompts, safe stdio).
 
 ---
 
 ## System Administration & Virtualization
 
-Guides for configuring, hardening, recovering, and virtualizing systems and container deployments.
-
 ### Proxmox System Administration
 - **Path**: [proxmox-system-administration/SKILL.md](proxmox-system-administration/SKILL.md)
-- **Description**: Administrate Proxmox VE hosts utilizing a strict least-privilege boundary model (host vs guest), hardened service accounts, and modular VM/LXC template instantiation.
+- **Description**: Proxmox VE host admin with host-vs-guest least privilege, service accounts, VM/LXC templates.
 
 ### Proxmox Stuck Boot Recovery
 - **Path**: [proxmox-vm-recovery/SKILL.md](proxmox-vm-recovery/SKILL.md)
-- **Description**: Walkthrough diagnosing and repairing UEFI/OVMF stuck VMs (such as Windows 11 stuck loops), handling disk-mount, EFI partition recovery, and config backups safely.
+- **Description**: Recover UEFI/OVMF stuck VMs (e.g. Windows boot loops), disk mount, EFI repair, config backup.
 
 ### WSL Linux Containers
 - **Path**: [wsl-containers/SKILL.md](wsl-containers/SKILL.md)
-- **Description**: Native WSL Containers via `wslc.exe` + `Microsoft.WSL.Containers` — man-style CLI flags, sessions, volumes/networks/GPU, and C# API reference (preview 2.9.3+).
+- **Description**: Native WSL Containers via `wslc.exe` + `Microsoft.WSL.Containers` — CLI, sessions, volumes/networks/GPU, C# API notes.
 
 ### Podman (Linux + Cockpit)
 - **Path**: [podman/SKILL.md](podman/SKILL.md)
-- **Description**: Create, run, exec, compose, and tear down Podman containers; Cockpit `cockpit-podman` UI; rootless defaults; container vs libvirt VM guidance.
+- **Description**: Create, run, exec, compose, and tear down Podman containers; Cockpit UI; rootless defaults.
 
 ### Buzz Relay Self-Host
 - **Path**: [buzz-relay-self-host/SKILL.md](buzz-relay-self-host/SKILL.md)
-- **Description**: Self-host Block Buzz (Docker Compose) behind a reverse proxy with WebSockets, closed membership, Desktop vs CLI schemes, mobile pairing (`/pair` sidecar), always-on `buzz-acp` agents, and optional Hermes gateway wiring. Placeholder-only; keep site inventory private.
-- **Hermes reference**: [buzz-relay-self-host/references/hermes-gateway.md](buzz-relay-self-host/references/hermes-gateway.md)
-- **Mobile pairing**: [buzz-relay-self-host/references/mobile-pairing.md](buzz-relay-self-host/references/mobile-pairing.md)
-- **Always-on ACP**: [buzz-relay-self-host/references/buzz-acp-bridge.md](buzz-relay-self-host/references/buzz-acp-bridge.md)
-- **Agent avatar**: [buzz-relay-self-host/references/agent-profile-avatar.md](buzz-relay-self-host/references/agent-profile-avatar.md)
+- **Description**: Self-host Block Buzz (Compose) behind a reverse proxy, WebSockets, mobile pairing, always-on `buzz-acp` agents, optional Hermes. Placeholder-only site inventory.
+- **References**: [hermes-gateway](buzz-relay-self-host/references/hermes-gateway.md) · [mobile-pairing](buzz-relay-self-host/references/mobile-pairing.md) · [buzz-acp-bridge](buzz-relay-self-host/references/buzz-acp-bridge.md) · [agent avatar](buzz-relay-self-host/references/agent-profile-avatar.md)
 
 ### Buzz ↔ Hermes Gateway
 - **Path**: [buzz-hermes-gateway/SKILL.md](buzz-hermes-gateway/SKILL.md)
-- **Description**: Connect Hermes Agent gateway to a Buzz community — dedicated agent key, hex+npub allowlist, systemd env load, mention rules, avatar/profile, and “eyes but no reply” authz debugging. Always-on ACP agents: see buzz-acp-bridge reference.
-
----
-
-## Agent workstation drive (start here)
-
-**Empower agents with a full operator loop:** container desktop + RDP + Windows GUI drive.
-
-| Piece | Path |
-|---|---|
-| **Entry skill** | [agent-workstation-drive/SKILL.md](agent-workstation-drive/SKILL.md) |
-| Harness install (Grok / Claude / Cursor / …) | [agent-workstation-drive/references/harness-install.md](agent-workstation-drive/references/harness-install.md) |
-| First-session prompt | [agent-workstation-drive/references/first-session-prompt.md](agent-workstation-drive/references/first-session-prompt.md) |
-| Cross-harness `AGENTS.md` | [AGENTS.md](AGENTS.md) |
-| Server (GNOME Wayland + GRD) | [gnome-wayland-rdp/](gnome-wayland-rdp/) |
-| Client (mstsc + user32) | [browser-read-bypass/](browser-read-bypass/) + `scripts/Invoke-MstscConnect.ps1` |
-
-A new agent that loads **`agent-workstation-drive`** should meet the skill’s five success criteria without prior session memory.
+- **Description**: Connect Hermes Agent gateway to a Buzz community (keys, allowlist, mention rules, authz debugging).
 
 ---
 
 ## Special Navigation & Browser Helpers
 
-Workarounds and tools for when models encounter unique terminal limits or application rendering blocks.
-
 ### Browser Read Bypass (Windows UI input)
 - **Path**: [browser-read-bypass/SKILL.md](browser-read-bypass/SKILL.md)
-- **Description**: Inject clicks and keystrokes on Windows via PowerShell/`user32` when computer-use is screenshot-only. Covers Edge/Chrome/Firefox under tier "read" **and** mstsc RDP client dialogs (Connect vs Learn more, PID-scoped windows, CredUI limits, cmdkey seeding). Portable script: `scripts/Invoke-MstscConnect.ps1`.
+- **Description**: Inject clicks/keys on Windows via PowerShell and `user32` when computer-use is screenshot-only. Browsers under tier “read” **and** mstsc (Connect vs Learn more, PID-scoped windows, CredUI limits, cmdkey). Script: [Invoke-MstscConnect.ps1](browser-read-bypass/scripts/Invoke-MstscConnect.ps1). Prefer Windows PowerShell 5.1 for `Add-Type` + System.Drawing.
 
 ### Canvas Browser Reading
 - **Path**: [read-canvas-browser/SKILL.md](read-canvas-browser/SKILL.md)
-- **Description**: Specialized visual interaction guidelines to handle canvas-rendered or WebGL-driven web pages where standard HTML DOM tree and accessibility engines return blank nodes.
+- **Description**: Visual interaction for canvas/WebGL pages where DOM/a11y trees are empty.
 
 ---
 
@@ -180,8 +130,67 @@ Workarounds and tools for when models encounter unique terminal limits or applic
 
 ### GNOME Wayland headless RDP (GRD)
 - **Path**: [gnome-wayland-rdp/SKILL.md](gnome-wayland-rdp/SKILL.md)
-- **Description**: GDM/GNOME-native remote path — `gnome-shell --wayland --headless` + `gnome-remote-desktop` (not xrdp). Session bus, PipeWire, FUSE clipboard aborts, dual-head promote, black-screen triage. Scripts under `gnome-wayland-rdp/scripts/`. Pair with **browser-read-bypass** and entry skill **agent-workstation-drive**.
+- **Description**: GNOME-native remote path — `gnome-shell --wayland --headless` + `gnome-remote-desktop` (not xrdp). Session bus, PipeWire, FUSE clipboard aborts, dual-head Meta-0/Meta-1 promote, log-first triage. Scripts under [gnome-wayland-rdp/scripts/](gnome-wayland-rdp/scripts/). Use with **browser-read-bypass** and **agent-workstation-drive**.
 
 ### Linux desktop + xrdp (X11)
-- Prefer the user Grok skill **`linux-desktop-rdp-container`** (`~/.grok/skills/`) for XFCE/Plasma + xrdp OCI images. Do not use that path as a substitute for GNOME Shell 50 Wayland.
+- **Not vendored in this repo.** Prefer the separate Grok user skill **`linux-desktop-rdp-container`** (e.g. under `~/.grok/skills/`) for XFCE/Plasma + xrdp OCI images. Do **not** use that stack as a substitute for GNOME Shell 50 Wayland/GRD.
 
+---
+
+## OpenCode Platform Skills
+
+Segmented guides for installing, configuring, and using OpenCode.
+
+### Quick start
+- [Intro](opencode/intro/SKILL.md) · [Prerequisites](opencode/prerequisites/SKILL.md) · [Install](opencode/install/SKILL.md) · [Windows](opencode/windows/SKILL.md)
+
+### Project setup
+- [Initialize](opencode/initialize/SKILL.md) · [Configure guide](opencode/configure-guide/SKILL.md) · [Providers](opencode/providers/SKILL.md)
+
+### Personalization
+- [Customize](opencode/customize/SKILL.md) · [Skill creation](opencode/skill-creation/SKILL.md) · [Plugins](opencode/plugins/SKILL.md)
+
+### Network, server, teams
+- [Network](opencode/network/SKILL.md) · [Server](opencode/server/SKILL.md) · [Enterprise](opencode/enterprise/SKILL.md) · [Ecosystem](opencode/ecosystem/SKILL.md) · [Share](opencode/share/SKILL.md)
+
+### Deep dives
+- [Agents](opencode/configure/agents/SKILL.md) · [LSP](opencode/configure/lsp/SKILL.md) · [Formatters](opencode/configure/formatters/SKILL.md) · [Go](opencode/go/SKILL.md) · [Add features](opencode/usage/add-features/SKILL.md)
+
+Further OpenCode topics live under [`opencode/`](opencode/) (TUI, usage, configure/*, etc.).
+
+---
+
+## Penetration Testing Suite
+
+Authorized assessment methodology, attack patterns, and tool skills. Use only with explicit permission and scope.
+
+### Core manuals
+- [Methodology guide](pentest/pentesting-methodology-guide.md) — PTES/OWASP-aligned process and safety
+- [Kali execution](pentest/methodology/SKILL.md) — phased discovery through report
+- [Attack patterns](pentest/attack-patterns/SKILL.md) — common web/Windows recipes
+- [Defender OPSEC](defender-opsec/SKILL.md) — Defender privacy toggles for authorized labs
+- [WSLC pentest workflow](wslc-pentest-workflow/SKILL.md) — pentest tooling inside persistent WSL containers
+
+### Tools
+Entry: [pentest/tools/SKILL.md](pentest/tools/SKILL.md). Individual tool skills under `pentest/tools/` (90+), including for example:
+
+- [nmap](pentest/tools/nmap/SKILL.md) · [nuclei](pentest/tools/nuclei/SKILL.md) · [dirsearch](pentest/tools/dirsearch/SKILL.md)
+- [burp-suite](pentest/tools/burp-suite/SKILL.md) · [bloodhound](pentest/tools/bloodhound/SKILL.md) · [mimikatz](pentest/tools/mimikatz/SKILL.md)
+- [netcat](pentest/tools/netcat/SKILL.md) · [chisel](pentest/tools/chisel/SKILL.md)
+
+---
+
+## Other skills
+
+### PDF to Tinker training
+- **Path**: [pdf-to-tinker-training/SKILL.md](pdf-to-tinker-training/SKILL.md)
+- **Description**: Pipeline and scripts for turning PDF material into training/finetune-oriented data (chunking, datum conversion, LoRA helpers under `pdf-to-tinker-training/scripts/`).
+
+---
+
+## Conventions
+
+- Skills are directories with a `SKILL.md` (YAML frontmatter `name` + `description`).
+- Prefer **placeholders** (`<host>`, `<port>`, `<user>`) over hard-coded lab endpoints in shared skills.
+- Optional `scripts/` and `references/` live next to the skill that owns them.
+- Workstation-drive **package = this git repo**; harness skill dirs are optional mirrors.
