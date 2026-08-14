@@ -44,6 +44,7 @@ clone agent-skills
 | Harness install (Grok / Claude / Cursor) | [agent-workstation-drive/references/harness-install.md](agent-workstation-drive/references/harness-install.md) |
 | Install script | [agent-workstation-drive/scripts/Install-ToHarness.ps1](agent-workstation-drive/scripts/Install-ToHarness.ps1) |
 | Server skill (GNOME Wayland + GRD) | [gnome-wayland-rdp/](gnome-wayland-rdp/) |
+| Server skill (Plasma Wayland + KRdp) | [kde-wayland-rdp/](kde-wayland-rdp/) |
 | Client skill (mstsc + user32) | [browser-read-bypass/](browser-read-bypass/) |
 | Portable mstsc helper | [browser-read-bypass/scripts/Invoke-MstscConnect.ps1](browser-read-bypass/scripts/Invoke-MstscConnect.ps1) |
 | Cross-harness notes | [AGENTS.md](AGENTS.md) |
@@ -131,6 +132,10 @@ Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 ### GNOME Wayland headless RDP (GRD)
 - **Path**: [gnome-wayland-rdp/SKILL.md](gnome-wayland-rdp/SKILL.md)
 - **Description**: GNOME-native remote path — `gnome-shell --wayland --headless` + `gnome-remote-desktop` (not xrdp). Session bus, PipeWire, FUSE clipboard aborts, dual-head Meta-0/Meta-1 promote, log-first triage. Scripts under [gnome-wayland-rdp/scripts/](gnome-wayland-rdp/scripts/). Use with **browser-read-bypass** and **agent-workstation-drive**.
+
+### KDE Plasma Wayland + KRdp
+- **Path**: [kde-wayland-rdp/SKILL.md](kde-wayland-rdp/SKILL.md)
+- **Description**: Latest Plasma on `kwin_wayland --virtual` + `krdpserver --plasma` (not xrdp). OpenGL vs QPainter, vgem/DRM, wslc seccomp, `KWIN_COMPOSE=O2`, mstsc NetworkAutoDetect, titlebar pointer (MOVE-then-button). Scripts under [kde-wayland-rdp/scripts/](kde-wayland-rdp/scripts/). Use with **browser-read-bypass** and **agent-workstation-drive**.
 
 ### Linux desktop + xrdp (X11)
 - **Not vendored in this repo.** Prefer the separate Grok user skill **`linux-desktop-rdp-container`** (e.g. under `~/.grok/skills/`) for XFCE/Plasma + xrdp OCI images. Do **not** use that stack as a substitute for GNOME Shell 50 Wayland/GRD.

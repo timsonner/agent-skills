@@ -19,6 +19,7 @@ if (-not $SourceRoot) {
 $skills = @(
   "agent-workstation-drive",
   "gnome-wayland-rdp",
+  "kde-wayland-rdp",
   "browser-read-bypass"
 )
 

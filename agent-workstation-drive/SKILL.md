@@ -7,7 +7,7 @@ description: >
   graphical Linux workstation, remote desktop automation, computer-use beyond the
   terminal, "drive the desktop", GUI in a container, or to unlock full operator-style
   agency. Entry skill for agent freedom through capabilities. Related: gnome-wayland-rdp,
-  browser-read-bypass, wslc-containers / wsl-containers, linux-desktop-rdp-container.
+  kde-wayland-rdp, browser-read-bypass, wslc-containers / wsl-containers, linux-desktop-rdp-container.
 author: Tim Sonner
 license: MIT
 ---
@@ -31,9 +31,10 @@ That is operator-shaped agency. Use it carefully and only in scopes the user aut
 |---|---|
 | **`agent-workstation-drive`** (this file) | Start here — full loop |
 | **`gnome-wayland-rdp`** | Server: headless GNOME + GRD, FUSE, dual-head |
+| **`kde-wayland-rdp`** | Server: Plasma Wayland + KRdp (not xrdp) |
 | **`browser-read-bypass`** | Client: mstsc/browser clicks via PowerShell |
 | **`wslc-containers`** or **`wsl-containers`** | Image build/run on Windows |
-| **`linux-desktop-rdp-container`** | X11 + xrdp only (XFCE/Plasma) — **not** GNOME 50 |
+| **`linux-desktop-rdp-container`** | X11 + xrdp only (XFCE/Plasma) — **not** GNOME 50 or Plasma Wayland |
 
 ## Harness-agnostic rules
 
@@ -151,7 +152,8 @@ at one. Skills and scripts for drive loop stay in **agent-skills**.
 | Password field stays empty | cmdkey + prompt for credentials:i:0 |
 | Session ends immediately | GRD FUSE abort → `gnome-wayland-rdp` FUSE |
 | Connected but black | FUSE stall / no First frame |
-| Wallpaper only, no apps | Dual-head promote Meta-1 |
+| Wallpaper only, no apps | Dual-head promote Meta-1 (GNOME) or Virtual-0 (Plasma KRdp) |
+| Plasma titlebar opens Kickoff / buttons no-op | `kde-wayland-rdp` Pointer and titlebar |
 | Shell never starts | Session bus wait |
 | PowerShell Add-Type fails | Use Windows PS 5.1 |
 

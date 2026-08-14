@@ -7,7 +7,8 @@ description: >
   --headless, grdctl --headless, PipeWire streams, FUSE clipboard aborts, black
   RDP after Connect, session bus races, Azure Linux or Fedora-sourced GNOME RPMs,
   or when xrdp cannot run GNOME because --x11 is gone. Companion client UI: skill
-  browser-read-bypass. X11/XFCE/Plasma+xrdp: skill linux-desktop-rdp-container.
+  browser-read-bypass. Latest Plasma Wayland + KRdp: skill kde-wayland-rdp.
+  X11/XFCE/Plasma+xrdp: skill linux-desktop-rdp-container.
 author: Tim Sonner
 license: MIT
 ---
@@ -172,4 +173,5 @@ CPU-only container until FUSE/session logs are clean.
 | mstsc / Windows UI injection | `browser-read-bypass` |
 | XFCE/Plasma + xrdp containers | `linux-desktop-rdp-container` |
 | wslc build/run/push | `wslc-containers` / `wsl-containers` |
+| Plasma Wayland + KRdp | `kde-wayland-rdp` |
 | This stack (Wayland headless GNOME + GRD) | **`gnome-wayland-rdp`** |
