@@ -28,12 +28,13 @@ Full agent loop (build → connect → drive): **`agent-workstation-drive`**.
 
 | Path | Purpose |
 |---|---|
+| `scripts/start-gnome-headless-rdp.sh` | Session bring-up: bus wait, grdctl, pipewire, shell, GRD, promote loop |
 | `scripts/promote-rdp-monitor.py` | Meta-1 sole primary after GRD attach |
 | `scripts/configure-desktop-ui.sh` | Wallpaper, dark theme, dash favorites |
 | `scripts/nofuseabort.c` | Source for FUSE `LD_PRELOAD` stub |
 | `scripts/libnofuseabort.so` | Prebuilt stub (x86_64 Linux) when present |
 
-Copy into the image as `/usr/local/bin/…` and wire from the session start script.
+Copy into the image as `/usr/local/bin/…`. The entrypoint should `mknod /dev/fuse`, start dbus/seatd, then `runuser` this start script. Set `GNOME_RDP_PASS` (and user/port) from the **project**.
 
 ## Architecture
 
@@ -41,7 +42,7 @@ Copy into the image as `/usr/local/bin/…` and wire from the session start scri
 entrypoint (root)
   ├─ /dev/fuse node if missing (device alone is not enough under seccomp)
   ├─ system dbus, seatd, polkit (best-effort logind/linger)
-  └─ runuser → start-gnome-headless-rdp.sh
+  └─ runuser → `scripts/start-gnome-headless-rdp.sh`
         ├─ session dbus on $XDG_RUNTIME_DIR/bus  (wait until ListNames works)
         ├─ grdctl --headless rdp: TLS, credentials, port, enable
         ├─ pipewire + wireplumber
