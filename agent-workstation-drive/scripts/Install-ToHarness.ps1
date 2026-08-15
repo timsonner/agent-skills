@@ -20,7 +20,8 @@ $skills = @(
   "agent-workstation-drive",
   "gnome-wayland-rdp",
   "kde-wayland-rdp",
-  "browser-read-bypass"
+  "browser-read-bypass",
+  "wsl-containers"
 )
 
 function Install-Into([string]$DestRoot) {

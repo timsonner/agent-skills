@@ -1,452 +1,230 @@
 ---
 name: wsl-containers
-description: Commands, man-style CLI flags, and Microsoft.WSL.Containers API for building/running Linux containers via wslc on Windows (no Docker Desktop required).
+description: >
+  Build, run, debug, and publish Linux containers with Microsoft wslc on Windows
+  (no Docker Desktop). Covers wslc CLI, no commit (export/import), DNS/apt, Hub
+  and ghcr.io publish, system session / privileged, and Microsoft.WSL.Containers
+  API. Use when: wslc, wslc.exe, WSL containers, wsl-containers, wslc-containers,
+  "/wslc-containers", "/wsl-containers", ghcr.io login with wslc.
 author: Tim Sonner
 license: MIT
 ---
-# WSL Containers skill
 
-Use this skill when building, running, inspecting, scripting, or troubleshooting **WSL Containers** (`wslc.exe` / `Microsoft.WSL.Containers`) on Windows.
+# WSL Containers (`wslc`)
 
-**Primary docs (follow links)**
-- Product overview: https://learn.microsoft.com/en-us/windows/wsl/wsl-container
-- Tutorial: https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers
-- API reference hub: https://wsl.dev/api-reference/
-- C# surface: https://wsl.dev/api-reference/csharp/
-- Samples: https://aka.ms/wslc-samples → `microsoft/WSL` `doc/samples/`
+Canonical name: **`wsl-containers`**. Older trigger **`wslc-containers`** is this skill.
 
-**Deep local references (this skill)**
-- `references/cli-reference.md` — full **man-style** flagbook for `wslc` 2.9.3.0 (run/create/exec/logs/build/image/network/volume/registry/session)
-- `references/api-reference.md` — C# object model (`WslcService` → `Session` → `Container` → `Process`) with property tables + E2E sample
-- `references/windows-skill-import.md` — Defender-safe skill import pattern
-
-Also pair with: `wslc-pentest-workflow` for persistent Kali engagement containers + tooling.
-
-Verified host baseline for this skill revision: **WSL / wslc 2.9.3.0**.
-
----
-
-## 1. What WSL Containers is
-
-Two major surfaces:
-
-| Piece | Role |
-|---|---|
-| **`wslc.exe`** (alias binary also ships as `container.exe`) | Docker-familiar CLI for build/run/exec/logs/images/networks/volumes |
-| **`Microsoft.WSL.Containers`** NuGet | Programmatic host API for Windows apps (C#, C++/WinRT, C `wslcsdk`) |
-
-Architecture (layered):
+`wslc.exe` ships with WSL ≥ 2.9.3. Docker-compatible subset. Containers run in a
+**dedicated session UVM** (Moby/dockerd), not in your Ubuntu distro.
 
 ```text
-Windows app / PowerShell / Hermes
-        │  wslc.exe or wslcsdk.dll
-        ▼
-Hyper-V sockets (WSLC_FORK / WSLC_MOUNT / WSLC_UNIX_CONNECT …)
-        ▼
-Session utility VM  ◄── dedicated UVM, NOT your Ubuntu distro
-   - Moby / dockerd
-   - OCI containers
-   - CDI GPU (microsoft.com/wslc=gpu → /dev/dxg)
-   - 9p / virtiofs host shares
+Windows (wslc.exe / Microsoft.WSL.Containers)
+        ▼  Hyper-V sockets
+Session utility VM  —  dockerd + OCI  —  not a WSL distro
 ```
 
-Defaults observed/documented for a session VM: ~2 vCPU, ~2000 MB RAM, dynamic VHDX (~32 GB documented default), ~5 minute boot timeout. Override via `%LOCALAPPDATA%\wslc\settings.yaml` or `SessionSettings`.
+**Deep tables (do not invent Docker-only flags):**
 
----
+| File | What |
+|---|---|
+| `references/cli-reference.md` | Man-style flagbook (`run`/`exec`/`build`/network/volume/session) |
+| `references/api-reference.md` | C# `WslcService` → `Session` → `Container` → `Process` |
+| `references/windows-skill-import.md` | Defender-safe skill import |
 
-## 2. Prerequisites & install
+Official: [WSL container](https://learn.microsoft.com/en-us/windows/wsl/wsl-container) ·
+[tutorial](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers) ·
+[API](https://wsl.dev/api-reference/). Prefer live `wslc <cmd> --help` / `-?` when unsure.
 
-### Check
+Desktop images: **`kde-wayland-rdp`**, **`gnome-wayland-rdp`**, **`linux-desktop-rdp-container`**.
+Long-lived Kali labs: **`wslc-pentest-workflow`**.
+
+## Preconditions
+
 ```powershell
-wsl --version          # need a container-capable WSL (this skill: 2.9.3.0+)
-wslc version           # should print wslc 2.9.3.0 (or newer)
+wsl --version          # container-capable WSL (2.9.3+)
+wslc version
+where.exe wslc         # typically C:\Program Files\WSL\wslc.exe
 wslc run --rm hello-world
 ```
 
-If `wslc` is not on PATH:
-```powershell
-& "C:\Program Files\WSL\wslc.exe" version
-# git-bash / Hermes POSIX shell:
-'/c/Program Files/WSL/wslc.exe' version
-```
+If missing: `wsl --update` (or `--pre-release` on older channels), then `wsl --shutdown`.
+No Docker Desktop. Alias binary: `container.exe`.
 
-### Update / enable
-```powershell
-# Admin/shell elevated as needed in older prerelease flows
-wsl --update
-# If still missing on older guidance channels:
-wsl --update --pre-release
-wsl --shutdown
-```
+Settings: `wslc settings` → `%LOCALAPPDATA%\wslc\settings.yaml`
+(`session.cpuCount`, `memorySize`, `defaultBindingAddress` = **127.0.0.1**, `credentialStore`).
 
-There is **no separate Docker Desktop / engine install** for the CLI itself — `wslc` is part of the WSL package under `C:\Program Files\WSL\`.
+## Command map (docker/podman → wslc)
 
-### Settings file
-```powershell
-wslc settings            # open %LOCALAPPDATA%\wslc\settings.yaml
-wslc settings reset      # rewrite commented defaults template
-```
+| docker / podman | wslc |
+|---|---|
+| `pull` / `run` / `exec` | same |
+| `ps` | `wslc list` / `ps` / `list -a` |
+| `rm -f` | `wslc remove -f` |
+| `images` | `wslc images` |
+| `build -t` | `wslc build -t … .` |
+| `tag` / `push` / `pull` / `login` | same (`login … ghcr.io` for GHCR) |
+| **`commit`** | **missing** → `export` + `import` |
+| `save` / `load` | `wslc save` / `load` |
+| `--restart unless-stopped` | not available |
+| `-v path:path:Z` | `-v path:path` (no `:Z`) |
+| `--dns` | `--dns 1.1.1.1` |
+| `--privileged` / `--cap-add` / `--device` / `cp` | **not** on CLI 2.9.3 — see below |
 
-Important keys:
-- `session.cpuCount`, `session.memorySize`, `session.maxStorageSize`
-- `session.defaultBindingAddress` (default published-port bind = **`127.0.0.1`**)
-- `credentialStore` = `wincred` | `file`
+Global help is `-?` / `--help`, not top-level `-h`.
 
----
+## Everyday CLI
 
-## 3. Agent workflow (how to use this skill)
-
-1. Prefer **live help** when flag uncertainty remains: `wslc <cmd> --help` (or `-?`).
-2. Prefer bind mounts for file I/O — **no `wslc cp`**.
-3. For long-lived lab/pentest boxes, create **named** containers **without** `--rm`, and use incrementing engagement IDs (see `wslc-pentest-workflow`).
-4. For capabilities missing from CLI (`--privileged`, cap-add), use either:
-   - SDK `ContainerSettings.Privileged = true`, or
-   - `wslc system session run docker run --privileged …`
-5. Treat programmatic sessions as isolated from `wslc ps` unless they share the default CLI session.
-6. Load man/flag tables from `references/cli-reference.md` and API tables from `references/api-reference.md` instead of inventing Docker-only flags.
-
-### Hermes shell notes
-- Hermes `terminal` on this profile is **git-bash / POSIX**, not PowerShell.
-- Prefer POSIX paths (`/c/Users/admin/...`) or quoted Windows paths.
-- Avoid PowerShell-only pipelines inside Hermes terminal unless you invoke `powershell.exe -NoProfile -Command '…'`.
-
----
-
-## 4. Everyday CLI recipes
-
-### Smoke test & inspect
 ```powershell
 wslc run --rm hello-world
-wslc run --rm -it ubuntu:latest bash -c "echo Hello world from WSL container!"
-wslc images
-wslc list            # aliases: ls, ps
+wslc build -t myimage:tag .
 wslc list -a
-wslc stats
-wslc container inspect <id>
-wslc image inspect <image>
+wslc remove -f mycontainer 2>$null
+wslc run -d --name mycontainer -p 8080:80 -m 2G myimage:tag
+wslc exec mycontainer bash -lc "uname -a"
+wslc logs mycontainer --tail 100
+wslc stop mycontainer
 ```
 
-### Detached web server (tutorial pattern)
+Desktop/RDP images: `-m 4G+`. Prefer **one-line** `wslc run` in PowerShell.
+
+Persistent + bind mount:
+
 ```powershell
-wslc run -d --rm -p 8080:80 --name web nginx
-curl http://localhost:8080/
-wslc exec web cat /etc/os-release
-wslc logs web --tail 100 --timestamps
-wslc container stop web     # removed automatically because --rm
+wslc run -d --name lab -v "C:\src:/src" myimage:tag sleep infinity
 ```
 
-### Persistent container with bind mount
+There is **no `wslc cp`**. Bind-mount, or pipe:
+
 ```powershell
-wslc run -d --name kali-pentest-002 `
-  -v "C:\Users\admin\pentest-workspace\engagement-002:/workspace" `
-  kalilinux/kali-rolling sleep infinity
-
-wslc exec kali-pentest-002 bash -lc 'apt-get update && uname -a'
-wslc stop kali-pentest-002
-wslc start kali-pentest-002
-# destructor:
-wslc remove -f kali-pentest-002
+Get-Content -AsByteStream -Raw C:\path\file.bin | wslc exec -i lab sh -c 'cat > /tmp/file.bin'
 ```
 
-Create-then-start alternate:
+### No `commit` — snapshot
+
 ```powershell
-wslc create --name my-kali -it -v C:\data:/data kalilinux/kali-rolling bash
-wslc start -ai my-kali
+wslc stop mycontainer
+wslc export -o $env:TEMP\snap.tar mycontainer
+wslc import $env:TEMP\snap.tar myimage:tag
 ```
 
-### Build from Dockerfile / Containerfile
-```powershell
-# from folder that contains Dockerfile or Containerfile
-wslc build -t helloworld-django .
-wslc build -f Containerfile -t app:dev --build-arg ENV=ci --no-cache .
-wslc run -d --rm -p 8000:8000 --name django helloworld-django
-wslc logs django
-wslc exec django uname
+Flattened FS. Prefer a Dockerfile rebuild for anything you publish.
+
+### Port in use
+
+```text
+Failed to map port … WSAEADDRINUSE
 ```
 
-### Resources, GPU, env, tmpfs
-```powershell
-wslc run -d --name heavy --cpus 2 -m 2G --shm-size 256M --tmpfs /tmp `
-  -e APP_ENV=prod --env-file .env -w /app `
-  --hostname worker1 myimg:latest
+`wslc list -a` then `remove -f` the holder, or pick another host port. Default publish
+bind is **loopback**; use `-p 0.0.0.0:HOST:CTR` for LAN.
 
-# GPU via CDI (microsoft.com/wslc=gpu)
-wslc run -d --name ml --gpus all pytorch/pytorch:latest sleep infinity
+### Harmless noise
+
+```text
+wsl: Your kernel does not support swap limit capabilities or the cgroup is not mounted.
+Memory limited without swap.
 ```
 
-> GPU path is DirectX/`/dev/dxg` style. Tools that hard-require classic OpenCL (often `hashcat`) still fail in many sessions — use CPU alternatives (`john`) or host GPU tooling (see pitfalls).
+PowerShell may paint this red. If `wslc list` shows **running** and exit code is 0, treat as OK.
 
-### Networks & volumes
-```powershell
-wslc network create labnet
-wslc volume create appdata
-wslc volume create -d vhd bigcache
+## DNS and apt inside containers
 
-wslc run -d --name a --network labnet --network-alias api `
-  -v appdata:/var/lib/app alpine sleep infinity
+Debian slim often has **no** `/etc/apt/sources.list` (deb822 only).
+`Temporary failure resolving 'deb.debian.org'`:
 
-wslc network list
-wslc volume list
-wslc network inspect labnet
-```
+1. Entrypoint: write `1.1.1.1` / `8.8.8.8` if resolution fails.
+2. Or `wslc run … --dns 1.1.1.1 --dns 8.8.8.8`
+3. Or fix `/etc/resolv.conf` inside, then `apt-get update`.
 
-### Registry auth
-```powershell
-echo $env:GHCR_PAT | wslc login -u USER --password-stdin ghcr.io
-wslc pull ghcr.io/org/img:tag
-wslc logout ghcr.io
-```
+Build stages often wipe `/var/lib/apt/lists/*`. Ship `ping`/`curl`/`iproute2` in desktop images.
 
-### Housekeeping
-```powershell
-wslc container prune
-wslc image prune -a
-wslc volume prune -a
-wslc network prune
-wslc rmi -f old:image
-wslc remove -f stale-ctr
-```
+Nested quotes / heredocs via `wslc exec … bash -lc '…'` fail often — write a script on a
+bind mount and exec the **file**. `wslc system session run` can finish without closing
+stdout; collect output then stop waiters.
 
-### Export / save / load / import
-```powershell
-wslc export -o C:\bak\ctr.tar myctr
-wslc save -o C:\bak\img.tar myimg:latest
-wslc load -i C:\bak\img.tar
-wslc import C:\bak\rootfs.tar restored:latest
-```
+## Privileged / devices / session VM
 
-### File copy without `cp`
-```powershell
-# Preferred: bind-mount and copy on either side of C:\… ↔ /workspace
-# Host → container (PowerShell, binary-safe)
-Get-Content -AsByteStream -Raw C:\path\file.bin |
-  wslc exec -i myctr sh -c 'cat > /tmp/file.bin'
+CLI 2.9.3 has no `--privileged`, `--cap-add`, or `--device`. Escape hatches:
 
-# Container → host
-wslc exec myctr cat /etc/os-release > C:\tmp\os-release.txt
-```
-
-### Session VM / privileged bridge
 ```powershell
 wslc system session list --verbose
-wslc system session shell
-wslc system session run docker ps
-wslc system session run docker run -d --name priv --privileged `
-  kalilinux/kali-rolling sleep infinity
-wslc system session run docker exec -it priv id
-wslc system session terminate
+wslc system session run docker run --privileged --name priv IMAGE sleep infinity
+wslc system session run docker exec priv id
 ```
 
----
+Or C# `ContainerSettings.Privileged = true` (`references/api-reference.md`).
+SDK sessions with a custom `Name`/`StoragePath` **do not** show up in `wslc ps`.
 
-## 5. Man-page top-level map (load full tables from CLI reference)
+Keep `system session run` commands **short** (wslc invalid-handle on long paths / `sh -c`
+with CRLF). Use `/run/ash` style helpers on the UVM when needed.
 
-| Command | Purpose |
-|---|---|
-| `run` / `create` / `start` / `stop` / `kill` / `remove` | Lifecycle |
-| `exec` / `attach` / `logs` / `stats` / `list` (`ps`/`ls`) | Interact / observe |
-| `build` / `images` / `pull` / `push` / `tag` / `load` / `save` / `import` / `rmi` | Images |
-| `inspect` / `export` | Deep detail / filesystem tar |
-| `network …` / `volume …` / `registry …` | Infra |
-| `system session …` | UVM shell / docker engine bridge / terminate |
-| `settings` | Open/reset YAML config |
-| `version` | Show version |
+GPU: `--gpus all` → CDI `microsoft.com/wslc=gpu` / `/dev/dxg`. Not a universal OpenCL
+guarantee (`hashcat` often fails).
 
-### `run` / `create` flags (high-signal)
+## Publish
 
-`--cidfile` · `--cpus` · `-d/--detach` (`run` only) · `--dns` · `--dns-option` · `--dns-search` · `--domainname` · `--entrypoint` · `-e/--env` · `--env-file` · `--gpus` · `-h/--hostname` · `-i/--interactive` · `-l/--label` · `-m/--memory` · `--name` · `--network` · `--network-alias` · `-p/--publish` · `-P/--publish-all` · `--rm` · `--shm-size` · `--stop-signal` · `--tmpfs` · `-t/--tty` · `--ulimit` · `-u/--user` · `-v/--volume` · `-w/--workdir` · `-?/--help`
-
-### Flags **not** on 2.9.3.0 CLI surface
-`--privileged` · `--cap-add` · `--device` · `wslc cp` · top-level `port`/`top` · top-level `prune` (use group `container|image|network|volume prune`)
-
-Help always: `wslc <command> -?` (not `-h` at global level).
-
-**Full flagbook:** `references/cli-reference.md`.
-
----
-
-## 6. Developer API (`Microsoft.WSL.Containers`)
+### Docker Hub
 
 ```powershell
-dotnet add package Microsoft.WSL.Containers   # samples use 2.9.3
+wslc login
+wslc tag myimage:tag <user>/myrepo:tag
+wslc push <user>/myrepo:tag
 ```
 
-```csharp
-using Microsoft.WSL.Containers;
+### GHCR
 
-// 1) Preconditions
-var missing = WslcService.GetMissingComponents();
-if (missing.Count > 0) { /* wsl --install / InstallWithDependencies */ }
-var ver = WslcService.GetVersion();
-
-// 2) Session = UVM
-using var session = new Session(new SessionSettings("MyApp", @"C:\WslcData")
-{
-    CpuCount = 4,
-    MemorySizeInMB = 4096,
-    EnableGpu = false
-});
-session.Start();
-
-// 3) Image
-var pull = session.PullImageAsync(new PullImageOptions("docker.io/library/alpine:latest"));
-pull.Progress = (_, p) => Console.WriteLine($"{p.Status} {p.CurrentBytes}/{p.TotalBytes}");
-await pull;
-
-// 4) Container + init process
-var init = new ProcessSettings
-{
-    CommandLine = new[] { "/bin/echo", "Hello from WSL Container!" },
-    OutputMode = ProcessOutputMode.Event
-};
-using var container = session.CreateContainer(new ContainerSettings("alpine:latest")
-{
-    Name = "hello-container",
-    InitProcess = init,
-    EnableAutoRemove = true,
-    Privileged = false, // CLI cannot set this; API can
-    PortMappings = { new ContainerPortMapping(8080, 80, PortProtocol.TCP) },
-    Volumes = { new ContainerVolume(@"C:\data", "/workspace", false) }
-});
-
-container.InitProcess.OutputReceived += data =>
-    Console.Write(System.Text.Encoding.UTF8.GetString(data));
-container.Start();
-
-// 5) Exec-style secondary process
-var proc = container.CreateProcess(new ProcessSettings
-{
-    CommandLine = new[] { "/bin/sh", "-c", "uname -a" },
-    OutputMode = ProcessOutputMode.Event
-});
-proc.Start();
-
-// 6) Cleanup
-if (container.State == ContainerState.Running)
-    container.Stop(Signal.SIGTERM, TimeSpan.FromSeconds(10));
-container.Delete(DeleteContainerOption.None);
-session.Terminate();
+```powershell
+wslc login -u <github-user> -p $env:CR_PAT ghcr.io
+wslc tag myimage:tag ghcr.io/<github-user>/myrepo:rdp
+wslc push ghcr.io/<github-user>/myrepo:rdp
 ```
 
-Key types (see API reference for full members):
+| | Hub | GHCR |
+|---|---|---|
+| Host | `docker.io` | **`ghcr.io`** |
+| Image | `<user>/name:tag` | `ghcr.io/<user>/name:tag` (often **lowercase**) |
+| Auth | Hub token | **Classic** PAT `write:packages` |
 
-| Type | Job |
-|---|---|
-| `WslcService` | `GetMissingComponents`, `GetVersion`, `InstallWithDependencies[Async]` |
-| `SessionSettings` | `Name`, `StoragePath`, `CpuCount`, `MemorySizeInMB`, `Timeout`, `EnableGpu`, `VhdRequirements` |
-| `Session` | image pull/push/load/import/tag/delete, Authenticate, CreateContainer, VHD volumes, Start/Terminate |
-| `ContainerSettings` | image, name, init process, ports, bind/named volumes, GPU, **Privileged**, networking mode, auto-remove |
-| `Container` | Start/Stop/Delete/CreateProcess/Inspect/State |
-| `ProcessSettings` / `Process` | CommandLine, env, cwd, OutputMode (`Discard|Stream|Event`), events + streams |
-| Enums | `Signal`, `ContainerState`, `DeleteContainerOption`, `ContainerNetworkingMode`, `ProcessOutputMode`, `PortProtocol`, `VhdType` |
+After GHCR push: package page → **Connect repository**; set **Public** if anonymous pulls
+matter. `org.opencontainers.image.source` helps new tags, not always old ones.
 
-**Docs drift warning:** Learn page snippets sometimes say `MemoryMB`, `CmdLine`, `DeleteContainerFlags`, `ComponentFlags`. Prefer wsl.dev + IntelliSense:
-- C# property: **`MemorySizeInMB`**, **`CommandLine`**, **`DeleteContainerOption`**
-- missing components: **list count**, not bitwise flags in the C# projection
+~10 GB/layer, ~10 min upload — large desktop images may need retry.
 
-**Full API pages:** `references/api-reference.md`.
+### Git of the packaging repo (not the image)
 
-Official sample matrix:
-- C Hello World · C++ Neofetch · C# Nextcloud (port map + bind data) · C# CustomContainerfile QR tool
+Fine-grained PAT: repo Contents **read/write**. Do not commit tokens.
 
----
+Published image README: pull-first + credentials table, then build-from-source. Lab
+passwords stay in the **project**, not this skill.
 
-## 7. Networking & ports
+## Agent checklist
 
-- Port publish via `-p` / `ContainerPortMapping`.
-- Default host bind is **loopback** (`settings.session.defaultBindingAddress = 127.0.0.1`).
-- For LAN reachability: `-p 0.0.0.0:8080:80` or change default bind in settings.
-- Session networking modes (design docs): none / NAT / virtio proxy; container networks: bridge / host / none / join-netns (CLI: `network` driver default `bridge`).
-- Avoid colliding host ports with Windows services and other WSL distro forwards.
+1. `wslc version` before assuming Docker/Podman.
+2. Never invent `wslc commit` or `wslc cp`.
+3. After `run`, trust `wslc list` (not only stderr).
+4. Hub vs GHCR: different host and token type.
+5. Desktop/RDP: also load the desktop skill for that stack; `-m 4G+` for GNOME/Plasma.
+6. Need caps/DRM that CLI cannot grant → `system session` or execns from the UVM
+   (see **`kde-wayland-rdp`**).
 
----
-
-## 8. GPU
-
-- CLI: `--gpus all`
-- API: `SessionSettings.EnableGpu` and/or `ContainerSettings.EnableGpu`
-- Implementation: CDI v0.6.0, kind `microsoft.com/wslc`, device id `microsoft.com/wslc=gpu`, char device `/dev/dxg`, libraries overlaid like WSLg.
-- Expect CUDA/DirectML-style stacks that understand WSL GPU; **not** a universal OpenCL guarantee.
-
----
-
-## 9. Enterprise / policy
-
-- Registry allowlist GPO: `WSLContainerRegistryAllowlist`
-- Blocked pulls → `WSLC_E_REGISTRY_BLOCKED_BY_POLICY`
-- Applies across CLI, SDK, and plugin paths
-- Session **names** are enumerable machine-wide (name, creator SID, creator PID) — never embed secrets in session names
-
----
-
-## 10. Troubleshooting & pitfalls
+## Pitfalls
 
 | Problem | Fix |
 |---|---|
-| `wslc` not recognized | `wsl --update`, restart shell, invoke `C:\Program Files\WSL\wslc.exe` |
-| Containers from C# not in `wslc ps` | Different session `Name`/`StoragePath` than CLI default (`%LOCALAPPDATA%\wslc\sessions\…`) |
-| Port works on localhost only | Expected with default bind — publish on `0.0.0.0` or change settings |
-| Need privileged / CAP_NET_ADMIN | API `Privileged=true` **or** `wslc system session run docker run --privileged …` |
-| No `wslc cp` | Bind-mount `-v` or stdin/stdout pipeline (see CLI reference) |
-| Heredoc / nested quotes via `wslc exec … bash -lc '…'` fail | Write script into host mount; exec the **file path** |
-| `system session run` appears to hang | Command finished but stdout not closed — collect output then kill waiters |
-| `hashcat` → `CL_PLATFORM_NOT_FOUND_KHR` | OpenCL often absent; use `john` or host GPU path |
-| Horizontal disk growth | `container prune`, `image prune -a`, `volume prune -a` |
-| NTFS mount + SSH keys `chmod 600` noop | Copy key to container-native fs (`/tmp`) then chmod |
-| Policy blocks registry | Check allowlist GPO / use permitted registry |
-| Snippet won’t compile against NuGet | Projection renames — see API drift table |
+| `wslc` not recognized | Full path under `C:\Program Files\WSL\`; `wsl --update` |
+| Port only on localhost | Default bind `127.0.0.1` |
+| Need privileged / extra devices | Session `docker run --privileged` or API `Privileged` |
+| C# containers missing from `wslc ps` | Different session storage than the CLI |
+| `hashcat` OpenCL | Often no platform; use CPU/`john` or host GPU |
+| NTFS bind + `chmod 600` | Copy key onto container-native fs first |
 
-Inspect helpers:
-```powershell
-wslc container inspect <id>
-wslc container logs <id>
-wslc image inspect <image>
-wslc system session list --verbose
-```
+## Cross-skill map
 
-Microsoft troubleshooting entry points:
-- WSL general: https://learn.microsoft.com/en-us/windows/wsl/troubleshooting
-- Tutorial cleanup: `wslc container prune` / `wslc image prune`
-
----
-
-## 11. Pentest / lab convention (pointer)
-
-For engagement work on this machine, **do not** improvise random container names. Use the dedicated skill:
-
-- Load `wslc-pentest-workflow`
-- Workspace: `C:\Users\<user>\pentest-workspace\engagement-<ENG_ID>`
-- Container: `kali-pentest-<ENG_ID>` with `/workspace` bind
-- Always **increment** `ENG_ID` (never reuse `001`)
-
----
-
-## 12. Success criteria
-
-- [ ] `wslc version` works (or full path works)
-- [ ] Ephemeral `wslc run --rm hello-world` succeeds
-- [ ] Can `run -d`, `exec`, `logs`, `stop`, `remove`
-- [ ] Bind mount writes appear on the Windows host
-- [ ] Know where full flag/API tables live (`references/*`)
-- [ ] Know privileged escape hatch + session isolation semantics
-- [ ] For app integration: package installs and sample lifecycle compiles against documented type names
-
----
-
-## 13. Quick command crib
-
-```text
-wslc version
-wslc run --rm -it alpine sh
-wslc run -d --name n -p 8080:80 -v C:\src:/src IMAGE
-wslc exec -it n bash
-wslc logs -f -n 200 n
-wslc ps -a ; wslc images ; wslc stats
-wslc build -t app:dev .
-wslc stop n ; wslc rm -f n
-wslc container prune ; wslc image prune -a
-wslc system session run docker ps
-wslc system session shell
-```
-
-When accuracy matters more than speed: open `references/cli-reference.md` or run `wslc <cmd> --help`.
+| Need | Skill |
+|---|---|
+| Plasma Wayland + KRdp | `kde-wayland-rdp` |
+| GNOME 50 + GRD | `gnome-wayland-rdp` |
+| XFCE/Plasma + xrdp | `linux-desktop-rdp-container` |
+| Drive loop / mstsc | `agent-workstation-drive` / `browser-read-bypass` |
+| Kali engagement boxes | `wslc-pentest-workflow` |
+| This CLI + API | **`wsl-containers`** |

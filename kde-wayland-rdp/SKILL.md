@@ -24,7 +24,7 @@ Latest Plasma remote desktop on Wayland is **KRdp**, not xrdp. Hannah Montana / 
 Plasma images are a different product.
 
 Client automation (mstsc Connect): **`browser-read-bypass`**.  
-Container build/run on Windows: **`wslc-containers`**.  
+Container build/run on Windows: **`wsl-containers`**.  
 Full drive loop: **`agent-workstation-drive`**.
 
 ### Scripts in this skill
@@ -260,5 +260,5 @@ screenshot can be a cropped viewport and hide the panel.
 | mstsc / Windows UI injection | `browser-read-bypass` |
 | GNOME 46+/50 + GRD | `gnome-wayland-rdp` |
 | XFCE/Plasma + xrdp (X11) | `linux-desktop-rdp-container` |
-| wslc build/run | `wslc-containers` / `wsl-containers` |
+| wslc build/run | `wsl-containers` |
 | This stack | **`kde-wayland-rdp`** |

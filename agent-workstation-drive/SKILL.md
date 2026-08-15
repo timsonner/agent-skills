@@ -7,7 +7,7 @@ description: >
   graphical Linux workstation, remote desktop automation, computer-use beyond the
   terminal, "drive the desktop", GUI in a container, or to unlock full operator-style
   agency. Entry skill for agent freedom through capabilities. Related: gnome-wayland-rdp,
-  kde-wayland-rdp, browser-read-bypass, wslc-containers / wsl-containers, linux-desktop-rdp-container.
+  kde-wayland-rdp, browser-read-bypass, wsl-containers, linux-desktop-rdp-container.
 author: Tim Sonner
 license: MIT
 ---
@@ -33,7 +33,7 @@ That is operator-shaped agency. Use it carefully and only in scopes the user aut
 | **`gnome-wayland-rdp`** | Server: headless GNOME + GRD, FUSE, dual-head |
 | **`kde-wayland-rdp`** | Server: Plasma Wayland + KRdp (not xrdp) |
 | **`browser-read-bypass`** | Client: mstsc/browser clicks via PowerShell |
-| **`wslc-containers`** or **`wsl-containers`** | Image build/run on Windows |
+| **`wsl-containers`** | Image build/run on Windows (`wslc`) |
 | **`linux-desktop-rdp-container`** | X11 + xrdp only (XFCE/Plasma) — **not** GNOME 50 or Plasma Wayland |
 
 ## Harness-agnostic rules

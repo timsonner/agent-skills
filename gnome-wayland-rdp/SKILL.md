@@ -173,6 +173,6 @@ CPU-only container until FUSE/session logs are clean.
 | Full drive loop / new agent onboarding | `agent-workstation-drive` |
 | mstsc / Windows UI injection | `browser-read-bypass` |
 | XFCE/Plasma + xrdp containers | `linux-desktop-rdp-container` |
-| wslc build/run/push | `wslc-containers` / `wsl-containers` |
+| wslc build/run/push | `wsl-containers` |
 | Plasma Wayland + KRdp | `kde-wayland-rdp` |
 | This stack (Wayland headless GNOME + GRD) | **`gnome-wayland-rdp`** |

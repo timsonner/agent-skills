@@ -98,7 +98,7 @@ Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 
 ### WSL Linux Containers
 - **Path**: [wsl-containers/SKILL.md](wsl-containers/SKILL.md)
-- **Description**: Native WSL Containers via `wslc.exe` + `Microsoft.WSL.Containers` — CLI, sessions, volumes/networks/GPU, C# API notes.
+- **Description**: Native WSL Containers via `wslc.exe` — build/run/publish cookbook plus CLI/API references. Replaces the older `wslc-containers` name.
 
 ### Podman (Linux + Cockpit)
 - **Path**: [podman/SKILL.md](podman/SKILL.md)
