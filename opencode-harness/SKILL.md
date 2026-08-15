@@ -127,9 +127,12 @@ opencode serve --port 4096 --hostname 127.0.0.1
 # GET http://127.0.0.1:4096/global/health  → { healthy, version }
 # GET http://127.0.0.1:4096/               → HTML
 opencode attach http://127.0.0.1:4096
-opencode run --attach http://localhost:4096 "…"
+opencode run --attach http://localhost:4096 --model opencode/big-pickle --dir <repo> "…"
 ```
 
+Verified: `GET /global/health` → `{ healthy: true, version }` and
+`opencode run --attach http://127.0.0.1:4097` returned `ATTACHED_OK`.
+**Stop the server when done** (`kill` the `opencode serve` process).
 Set `OPENCODE_SERVER_PASSWORD` if the port is reachable beyond this box.
 Docs: https://opencode.ai/docs/server/
 
@@ -137,7 +140,7 @@ Docs: https://opencode.ai/docs/server/
 
 ```powershell
 opencode mcp list
-opencode mcp add <name>
+opencode mcp add [name] [--url …]   # interactive-ish; do not add unless asked
 opencode plugin <npm-module> [-g]
 opencode debug skill          # skills OpenCode loaded
 opencode debug paths          # data/config/cache

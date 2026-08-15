@@ -72,7 +72,16 @@ the same thread. `-c` is last conversation in that dir.
 
 ```powershell
 agy --continue --print "Follow-up in the same thread"
+agy --conversation <uuid> --print "Same thread, pinned id"
 ```
+
+`--output-format json` includes `conversation_id` — save that and pass `--conversation`.
+`--json-schema <file.json>` + `--output-format json` fills `structured_output` (verified).
+
+`--mode plan` writes a plan artifact under `~/.gemini/antigravity-cli/brain/<id>/`
+and does **not** create the planned file in cwd (verified: empty folder stayed empty).
+`--sandbox` exists; this host already sandboxes terminal tools by default.
+`--effort low|medium|high` is accepted on print runs.
 
 Smoke:
 
