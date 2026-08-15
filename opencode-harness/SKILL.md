@@ -89,6 +89,75 @@ opencode -s <session_id>
 Need a real PTY. A headless `run_terminal_command` without a TTY is the wrong way to
 drive the TUI; use `opencode run` instead.
 
+## Models
+
+```powershell
+opencode models                 # ids
+opencode models --verbose       # cost, context, capabilities
+opencode models opencode        # filter by provider
+```
+
+Per-run switch: `-m provider/model`. TUI: **Ctrl+X** then **M**.
+Default in `~/.config/opencode/opencode.jsonc`: `"model": "opencode/big-pickle"`.
+Schema: https://opencode.ai/config.json — invalid config **refuses to start**.
+Restart OpenCode after editing config (not hot-reloaded).
+
+`opencode models xai` fails until `opencode providers login`. Zen free models
+need no local `auth.json` on this host.
+
+## Sessions and stats
+
+Sessions are **per project directory**. List from that dir:
+
+```powershell
+Set-Location <repo>
+opencode session list -n 15
+opencode export <sessionID> --sanitize    # JSON; redacts paths/titles
+opencode stats --days 7 --models --project ""
+```
+
+`-c` = last session in that dir (wrong if something else ran). Prefer `-s <id>`.
+`--fork` copies instead of appending. DB: `opencode db path`
+(`~\.local\share\opencode\opencode.db`).
+
+## Headless HTTP server
+
+```powershell
+opencode serve --port 4096 --hostname 127.0.0.1
+# GET http://127.0.0.1:4096/global/health  → { healthy, version }
+# GET http://127.0.0.1:4096/               → HTML
+opencode attach http://127.0.0.1:4096
+opencode run --attach http://localhost:4096 "…"
+```
+
+Set `OPENCODE_SERVER_PASSWORD` if the port is reachable beyond this box.
+Docs: https://opencode.ai/docs/server/
+
+## MCP / plugins / skills OpenCode can see
+
+```powershell
+opencode mcp list
+opencode mcp add <name>
+opencode plugin <npm-module> [-g]
+opencode debug skill          # skills OpenCode loaded
+opencode debug paths          # data/config/cache
+opencode debug config         # resolved config
+```
+
+OpenCode auto-loads `~/.claude/skills/*/SKILL.md` (and `~/.agents/skills`).
+That tree can be **stale** vs `agent-skills` / `~/.grok/skills` (e.g. still
+`browser-read-bypass`). Point it at the clone:
+
+```jsonc
+// ~/.config/opencode/opencode.jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "skills": { "paths": ["C:/Users/<you>/agent-skills"] }
+}
+```
+
+Do not put API keys in committed jsonc.
+
 ## Pitfalls
 
 - PATH stale after winget — refresh Machine+User Path in the **current** shell.
@@ -97,3 +166,6 @@ drive the TUI; use `opencode run` instead.
 - Product docs live under **`opencode/`** in this repo; this skill is **how to invoke** it.
 - Host is PowerShell: do not put Linux `2>/dev/null` in double-quoted strings
   (see **`wsl-containers`** Host PowerShell vs Linux).
+- `opencode serve` without `OPENCODE_SERVER_PASSWORD` prints **unsecured**.
+- `debug skill` may show old copies under `~/.claude/skills` — prefer `skills.paths`
+  to **`agent-skills`**.
