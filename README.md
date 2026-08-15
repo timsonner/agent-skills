@@ -45,8 +45,8 @@ clone agent-skills
 | Install script | [agent-workstation-drive/scripts/Install-ToHarness.ps1](agent-workstation-drive/scripts/Install-ToHarness.ps1) |
 | Server skill (GNOME Wayland + GRD) | [gnome-wayland-rdp/](gnome-wayland-rdp/) |
 | Server skill (Plasma Wayland + KRdp) | [kde-wayland-rdp/](kde-wayland-rdp/) |
-| Client skill (mstsc + user32) | [browser-read-bypass/](browser-read-bypass/) |
-| Portable mstsc helper | [browser-read-bypass/scripts/Invoke-MstscConnect.ps1](browser-read-bypass/scripts/Invoke-MstscConnect.ps1) |
+| Client skill (mstsc + user32) | [windows-ui-inject/](windows-ui-inject/) |
+| Portable mstsc helper | [windows-ui-inject/scripts/Invoke-MstscConnect.ps1](windows-ui-inject/scripts/Invoke-MstscConnect.ps1) |
 | Cross-harness notes | [AGENTS.md](AGENTS.md) |
 
 **In this repo:** skills, scripts (promote monitor, desktop UI, FUSE stub sources, mstsc connect), install docs.  
@@ -117,9 +117,9 @@ Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 
 ## Special Navigation & Browser Helpers
 
-### Browser Read Bypass (Windows UI input)
-- **Path**: [browser-read-bypass/SKILL.md](browser-read-bypass/SKILL.md)
-- **Description**: Inject clicks/keys on Windows via PowerShell and `user32` when computer-use is screenshot-only. Browsers under tier “read” **and** mstsc (Connect vs Learn more, PID-scoped windows, CredUI limits, cmdkey). Script: [Invoke-MstscConnect.ps1](browser-read-bypass/scripts/Invoke-MstscConnect.ps1). Prefer Windows PowerShell 5.1 for `Add-Type` + System.Drawing.
+### Windows UI inject
+- **Path**: [windows-ui-inject/SKILL.md](windows-ui-inject/SKILL.md)
+- **Description**: Inject clicks/keys on Windows via PowerShell and `user32` when computer-use is screenshot-only. Browsers under tier “read” **and** mstsc (Connect vs Learn more, PID-scoped windows, CredUI limits, cmdkey). Script: [Invoke-MstscConnect.ps1](windows-ui-inject/scripts/Invoke-MstscConnect.ps1). Prefer Windows PowerShell 5.1 for `Add-Type` + System.Drawing.
 
 ### Canvas Browser Reading
 - **Path**: [read-canvas-browser/SKILL.md](read-canvas-browser/SKILL.md)
@@ -131,11 +131,11 @@ Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 
 ### GNOME Wayland headless RDP (GRD)
 - **Path**: [gnome-wayland-rdp/SKILL.md](gnome-wayland-rdp/SKILL.md)
-- **Description**: GNOME-native remote path — `gnome-shell --wayland --headless` + `gnome-remote-desktop` (not xrdp). Session bus, PipeWire, FUSE clipboard aborts, dual-head Meta-0/Meta-1 promote, log-first triage. Scripts under [gnome-wayland-rdp/scripts/](gnome-wayland-rdp/scripts/). Use with **browser-read-bypass** and **agent-workstation-drive**.
+- **Description**: GNOME-native remote path — `gnome-shell --wayland --headless` + `gnome-remote-desktop` (not xrdp). Session bus, PipeWire, FUSE clipboard aborts, dual-head Meta-0/Meta-1 promote, log-first triage. Scripts under [gnome-wayland-rdp/scripts/](gnome-wayland-rdp/scripts/). Use with **windows-ui-inject** and **agent-workstation-drive**.
 
 ### KDE Plasma Wayland + KRdp
 - **Path**: [kde-wayland-rdp/SKILL.md](kde-wayland-rdp/SKILL.md)
-- **Description**: Latest Plasma on `kwin_wayland --virtual` + `krdpserver --plasma` (not xrdp). OpenGL vs QPainter, vgem/DRM, wslc seccomp, `KWIN_COMPOSE=O2`, mstsc NetworkAutoDetect, titlebar pointer (MOVE-then-button). Scripts under [kde-wayland-rdp/scripts/](kde-wayland-rdp/scripts/). Use with **browser-read-bypass** and **agent-workstation-drive**.
+- **Description**: Latest Plasma on `kwin_wayland --virtual` + `krdpserver --plasma` (not xrdp). OpenGL vs QPainter, vgem/DRM, wslc seccomp, `KWIN_COMPOSE=O2`, mstsc NetworkAutoDetect, titlebar pointer (MOVE-then-button). Scripts under [kde-wayland-rdp/scripts/](kde-wayland-rdp/scripts/). Use with **windows-ui-inject** and **agent-workstation-drive**.
 
 ### Linux desktop + xrdp (X11)
 - **Not vendored in this repo.** Prefer the separate Grok user skill **`linux-desktop-rdp-container`** (e.g. under `~/.grok/skills/`) for XFCE/Plasma + xrdp OCI images. Do **not** use that stack as a substitute for GNOME Shell 50 Wayland/GRD.

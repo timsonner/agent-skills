@@ -20,7 +20,7 @@ Everything required to drive is **in-repo**:
 | `AGENTS.md` | Cross-harness bootstrap |
 | `agent-workstation-drive/` | Entry skill + first-session prompt |
 | `gnome-wayland-rdp/` + `scripts/` | Server skill + promote/UI/FUSE |
-| `browser-read-bypass/` + `scripts/Invoke-MstscConnect.ps1` | Client drive script |
+| `windows-ui-inject/` + `scripts/Invoke-MstscConnect.ps1` | Client drive script |
 | `agent-workstation-drive/scripts/Install-ToHarness.ps1` | Optional copy into Grok/Claude/Cursor |
 
 A lab **desktop image project** (Dockerfile for GNOME+GRD) is separate; point the agent at whichever image project the user provides. Skills stay portable (no hard-coded host/port).
@@ -31,7 +31,7 @@ A lab **desktop image project** (Dockerfile for GNOME+GRD) is separate; point th
 agent-skills/   # this repo
   agent-workstation-drive/
   gnome-wayland-rdp/
-  browser-read-bypass/
+  windows-ui-inject/
   AGENTS.md
   …
 ```

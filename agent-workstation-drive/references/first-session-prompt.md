@@ -8,7 +8,7 @@ Copy-paste or adapt:
 ---
 
 You have access to the **agent-skills** repository. Load the workstation-drive family
-from this clone: `agent-workstation-drive`, `gnome-wayland-rdp`, `browser-read-bypass`
+from this clone: `agent-workstation-drive`, `gnome-wayland-rdp`, `windows-ui-inject`
 (and their `scripts/` directories). Do not assume prior session memory.
 
 Your job: gain a **live GNOME Wayland RDP session** and prove you can drive it.
@@ -19,7 +19,7 @@ Your job: gain a **live GNOME Wayland RDP session** and prove you can drive it.
   README, `.rdp` file, or ask me once and keep them in this session only.
 - On RDP failure: **container logs first**, then client UI.
 - mstsc: **Connect**, never **Learn more**. Prefer `Invoke-MstscConnect.ps1`
-  under `browser-read-bypass/scripts/` with Windows PowerShell 5.1.
+  under `windows-ui-inject/scripts/` with Windows PowerShell 5.1.
 - GNOME 50 uses **GRD headless**, not xrdp.
 
 ### Steps

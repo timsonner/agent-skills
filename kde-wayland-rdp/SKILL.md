@@ -7,7 +7,7 @@ description: >
   KWIN_COMPOSE=O2, KRdp --plasma --virtual-monitor, mstsc CredSSP + FreeRDP
   NetworkAutoDetect RTT drop, PipeWire screencast "Unsupported compositing type",
   titlebar close/min/drag opening Kickoff (fake_input pointer at 0,0).
-  Companion client: browser-read-bypass. GNOME/GRD: gnome-wayland-rdp. Plasma+xrdp:
+  Companion client: windows-ui-inject. GNOME/GRD: gnome-wayland-rdp. Plasma+xrdp:
   linux-desktop-rdp-container. Triggers: "/kde-wayland-rdp", "/kde-wayland-container",
   "latest KDE Wayland", "KRdp", "kwin_wayland --virtual".
 author: Tim Sonner
@@ -23,7 +23,7 @@ license: MIT
 Latest Plasma remote desktop on Wayland is **KRdp**, not xrdp. Hannah Montana / X11
 Plasma images are a different product.
 
-Client automation (mstsc Connect): **`browser-read-bypass`**.  
+Client automation (mstsc Connect): **`windows-ui-inject`**.  
 Container build/run on Windows: **`wsl-containers`**.  
 Full drive loop: **`agent-workstation-drive`**.
 
@@ -168,7 +168,7 @@ KRdp is **NLA-only** and **one client**.
 
 | Client | Notes |
 |---|---|
-| **mstsc** | CredSSP on. Seed **cmdkey** `TERMSRV/<host>`. `.rdp`: `enablecredsspsupport:i:1`, `authentication level:i:0`, `prompt for credentials:i:0`, **`smart sizing:i:1`** when the window is smaller than `--virtual-monitor`. Click **Connect**, never **Learn more** (`browser-read-bypass`). |
+| **mstsc** | CredSSP on. Seed **cmdkey** `TERMSRV/<host>`. `.rdp`: `enablecredsspsupport:i:1`, `authentication level:i:0`, `prompt for credentials:i:0`, **`smart sizing:i:1`** when the window is smaller than `--virtual-monitor`. Click **Connect**, never **Learn more** (`windows-ui-inject`). |
 | **FreeRDP** | Works without the autodetect preload. Use when debugging the graphics path. |
 
 mstsc after auth that dies at “Configuring remote session…” with server
@@ -257,7 +257,7 @@ screenshot can be a cropped viewport and hide the panel.
 | Need | Skill |
 |---|---|
 | Full drive loop | `agent-workstation-drive` |
-| mstsc / Windows UI injection | `browser-read-bypass` |
+| mstsc / Windows UI injection | `windows-ui-inject` |
 | GNOME 46+/50 + GRD | `gnome-wayland-rdp` |
 | XFCE/Plasma + xrdp (X11) | `linux-desktop-rdp-container` |
 | wslc build/run | `wsl-containers` |

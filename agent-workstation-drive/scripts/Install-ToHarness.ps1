@@ -20,6 +20,7 @@ $skills = @(
   "agent-workstation-drive",
   "gnome-wayland-rdp",
   "kde-wayland-rdp",
+  "windows-ui-inject",
   "browser-read-bypass",
   "wsl-containers"
 )

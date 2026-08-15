@@ -7,7 +7,7 @@ description: >
   --headless, grdctl --headless, PipeWire streams, FUSE clipboard aborts, black
   RDP after Connect, session bus races, Azure Linux or Fedora-sourced GNOME RPMs,
   or when xrdp cannot run GNOME because --x11 is gone. Companion client UI: skill
-  browser-read-bypass. Latest Plasma Wayland + KRdp: skill kde-wayland-rdp.
+  windows-ui-inject. Latest Plasma Wayland + KRdp: skill kde-wayland-rdp.
   X11/XFCE/Plasma+xrdp: skill linux-desktop-rdp-container.
 author: Tim Sonner
 license: MIT
@@ -21,7 +21,7 @@ license: MIT
 GNOME Shell 46+ dropped classic X11 session flags; Shell **50** is Wayland-oriented.
 Remote access is **GRD** (FreeRDP server), not xrdp.
 
-Client automation (mstsc Connect / credentials): **`browser-read-bypass`**.  
+Client automation (mstsc Connect / credentials): **`windows-ui-inject`**.  
 Full agent loop (build → connect → drive): **`agent-workstation-drive`**.
 
 ### Scripts in this skill
@@ -164,14 +164,14 @@ CPU-only container until FUSE/session logs are clean.
 - Do not use xrdp `startwm` for GNOME 50 as the primary path  
 - Do not hard-code host IPs or published ports in skills or shared snippets  
 - Do not skip logs and only re-run mstsc  
-- Do not click **Learn more** when testing clients (see **`browser-read-bypass`**)
+- Do not click **Learn more** when testing clients (see **`windows-ui-inject`**)
 
 ## Cross-skill map
 
 | Need | Skill |
 |---|---|
 | Full drive loop / new agent onboarding | `agent-workstation-drive` |
-| mstsc / Windows UI injection | `browser-read-bypass` |
+| mstsc / Windows UI injection | `windows-ui-inject` |
 | XFCE/Plasma + xrdp containers | `linux-desktop-rdp-container` |
 | wslc build/run/push | `wsl-containers` |
 | Plasma Wayland + KRdp | `kde-wayland-rdp` |

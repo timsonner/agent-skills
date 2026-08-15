@@ -9,7 +9,7 @@ If you can run shell on Windows and read skills under this clone, you can operat
 1. **`agent-workstation-drive/SKILL.md`** — end-to-end playbook  
 2. **`gnome-wayland-rdp/SKILL.md`** — GNOME Wayland + GRD server  
 3. **`kde-wayland-rdp/SKILL.md`** — Plasma Wayland + KRdp server  
-4. **`browser-read-bypass/SKILL.md`** — mstsc / UI injection  
+4. **`windows-ui-inject/SKILL.md`** — mstsc / UI injection (alias: `browser-read-bypass`)  
 
 Bootstrap prompt: `agent-workstation-drive/references/first-session-prompt.md`  
 Harness install: `agent-workstation-drive/references/harness-install.md`  

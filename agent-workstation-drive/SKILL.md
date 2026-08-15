@@ -7,7 +7,7 @@ description: >
   graphical Linux workstation, remote desktop automation, computer-use beyond the
   terminal, "drive the desktop", GUI in a container, or to unlock full operator-style
   agency. Entry skill for agent freedom through capabilities. Related: gnome-wayland-rdp,
-  kde-wayland-rdp, browser-read-bypass, wsl-containers, linux-desktop-rdp-container.
+  kde-wayland-rdp, windows-ui-inject, wsl-containers, linux-desktop-rdp-container.
 author: Tim Sonner
 license: MIT
 ---
@@ -32,7 +32,7 @@ That is operator-shaped agency. Use it carefully and only in scopes the user aut
 | **`agent-workstation-drive`** (this file) | Start here — full loop |
 | **`gnome-wayland-rdp`** | Server: headless GNOME + GRD, FUSE, dual-head |
 | **`kde-wayland-rdp`** | Server: Plasma Wayland + KRdp (not xrdp) |
-| **`browser-read-bypass`** | Client: mstsc/browser clicks via PowerShell |
+| **`windows-ui-inject`** | Client: mstsc/browser clicks via PowerShell |
 | **`wsl-containers`** | Image build/run on Windows (`wslc`) |
 | **`linux-desktop-rdp-container`** | X11 + xrdp only (XFCE/Plasma) — **not** GNOME 50 or Plasma Wayland |
 
@@ -45,7 +45,7 @@ Works in any agent that can:
 - Optionally view image screenshots  
 
 No special MCP computer-use grant required for **driving** UI if you use
-`browser-read-bypass` (user32 injection). Still use screenshots to see.
+`windows-ui-inject` (user32 injection). Still use screenshots to see.
 
 **Install skills for your harness** — see [references/harness-install.md](references/harness-install.md).
 
@@ -83,7 +83,7 @@ Prefer the portable script (Windows PowerShell **5.1**):
 ```powershell
 $ps51 = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
 & $ps51 -NoProfile -ExecutionPolicy Bypass -File `
-  "<agent-skills>/browser-read-bypass/scripts/Invoke-MstscConnect.ps1" `
+  "<agent-skills>/windows-ui-inject/scripts/Invoke-MstscConnect.ps1" `
   -HostAddress <host> -Port <host-port> -User <user> -Password <pass> `
   -ShotDir <shot-dir>
 ```
@@ -95,7 +95,7 @@ Script behavior (do not regress):
 - Scopes windows to **mstsc PID**  
 - Writes screenshots under `-ShotDir`  
 
-Manual rules: same as skill **`browser-read-bypass`**.
+Manual rules: same as skill **`windows-ui-inject`**.
 
 ### 3. Session healthy?
 
@@ -116,7 +116,7 @@ If wallpaper shows but apps do not: Meta-0 vs Meta-1. Run promote loop from
 With mstsc focused:
 
 - Screenshot → choose coordinates (window-relative when possible)  
-- Click / Super (Activities) / type via **`browser-read-bypass`**  
+- Click / Super (Activities) / type via **`windows-ui-inject`**  
 - Screenshot to verify  
 
 Inside the container (often easier for launchers):
@@ -148,7 +148,7 @@ at one. Skills and scripts for drive loop stay in **agent-skills**.
 
 | Symptom | Open skill section |
 |---|---|
-| Learn more / wrong window | `browser-read-bypass` mstsc rules |
+| Learn more / wrong window | `windows-ui-inject` mstsc rules |
 | Password field stays empty | cmdkey + prompt for credentials:i:0 |
 | Session ends immediately | GRD FUSE abort → `gnome-wayland-rdp` FUSE |
 | Connected but black | FUSE stall / no First frame |

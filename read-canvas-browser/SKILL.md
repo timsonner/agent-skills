@@ -39,6 +39,8 @@ Controls the OS and sees the actual screen pixels. Use this for:
 
 These two tool sets complement each other — use Chrome MCP to drive the browser and computer-use to see and interact with what's rendered.
 
+If computer-use is **read-only** or Chrome MCP is disconnected, inject clicks with **`windows-ui-inject`**.
+
 ---
 
 ## Step-by-Step

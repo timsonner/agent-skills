@@ -225,6 +225,6 @@ passwords stay in the **project**, not this skill.
 | Plasma Wayland + KRdp | `kde-wayland-rdp` |
 | GNOME 50 + GRD | `gnome-wayland-rdp` |
 | XFCE/Plasma + xrdp | `linux-desktop-rdp-container` |
-| Drive loop / mstsc | `agent-workstation-drive` / `browser-read-bypass` |
+| Drive loop / mstsc | `agent-workstation-drive` / `windows-ui-inject` |
 | Kali engagement boxes | `wslc-pentest-workflow` |
 | This CLI + API | **`wsl-containers`** |
