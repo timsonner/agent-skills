@@ -123,4 +123,7 @@ hermes gateway            # messaging — see buzz-hermes-gateway
 - Gateway/Buzz is **`buzz-hermes-gateway`**, not this skill.
 - Host is PowerShell: do not put Linux `2>/dev/null` in double-quoted strings
   (see **`wsl-containers`**).
-- Offload: **`harness-offload`**.
+- Offload: **`harness-offload`**. The dispatcher runs Hermes via
+  `System.Diagnostics.Process` so `session_id:` on stderr is **not** turned
+  into a PowerShell `NativeCommandError` (that used to look like a crash at
+  `Invoke-HarnessOffload.ps1:199`).

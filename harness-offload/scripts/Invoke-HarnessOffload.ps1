@@ -184,32 +184,46 @@ switch ($Worker) {
   }
 }
 
-$stderrFile = [System.IO.Path]::GetTempFileName()
-Push-Location -LiteralPath $Dir
-$prevEap = $ErrorActionPreference
-$ErrorActionPreference = "Continue"
-$prevNative = $null
-if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
-  $prevNative = $PSNativeCommandUseErrorActionPreference
-  $PSNativeCommandUseErrorActionPreference = $false
+function ConvertTo-WinArgLine([System.Collections.IEnumerable]$parts) {
+  # Windows argv quoting. Do not use Start-Process -ArgumentList (it splits on spaces).
+  $bits = foreach ($part in $parts) {
+    $s = [string]$part
+    if ($s -notmatch '[ \t"]') { $s }
+    else { '"' + ($s -replace '"', '""') + '"' }
+  }
+  return ($bits -join " ")
 }
-try {
-  # Call operator keeps each arg intact (Start-Process splits -Prompt).
-  # Native stderr must not become a terminating NativeCommandError.
-  $raw = & $exe @argList 2>$stderrFile
-  $exit = $LASTEXITCODE
-} finally {
-  $ErrorActionPreference = $prevEap
-  if ($null -ne $prevNative) { $PSNativeCommandUseErrorActionPreference = $prevNative }
-  Pop-Location
+
+function Invoke-WorkerProcess([string]$File, [System.Collections.IEnumerable]$Arguments, [string]$WorkingDirectory) {
+  # Run outside the PowerShell error pipeline. Hermes/codex write session lines
+  # to stderr; `& exe 2>file` turns that into NativeCommandError at this script
+  # line and pollutes transcripts (looks like a crash at :199).
+  $psi = New-Object System.Diagnostics.ProcessStartInfo
+  $psi.FileName = $File
+  $psi.WorkingDirectory = $WorkingDirectory
+  $psi.UseShellExecute = $false
+  $psi.RedirectStandardOutput = $true
+  $psi.RedirectStandardError = $true
+  $psi.CreateNoWindow = $true
+  $psi.Arguments = ConvertTo-WinArgLine $Arguments
+  $proc = New-Object System.Diagnostics.Process
+  $proc.StartInfo = $psi
+  [void]$proc.Start()
+  $stdoutTask = $proc.StandardOutput.ReadToEndAsync()
+  $stderrTask = $proc.StandardError.ReadToEndAsync()
+  $proc.WaitForExit()
+  return @{
+    ExitCode = $proc.ExitCode
+    Stdout   = [string]$stdoutTask.Result
+    Stderr   = [string]$stderrTask.Result
+  }
 }
+
+$invoked = Invoke-WorkerProcess $exe $argList $Dir
+$exit = $invoked.ExitCode
 if ($null -eq $exit) { $exit = 0 }
-$rawText = if ($null -eq $raw) { "" } else { ($raw | Out-String) }
-$errText = ""
-if (Test-Path -LiteralPath $stderrFile) {
-  $errText = ((Get-Content -LiteralPath $stderrFile -Raw -ErrorAction SilentlyContinue) + "").Trim()
-  Remove-Item -LiteralPath $stderrFile -Force -ErrorAction SilentlyContinue
-}
+$rawText = $invoked.Stdout
+$errText = ($invoked.Stderr + "").Trim()
 
 switch ($Worker) {
   "agy" { $parsed = Get-AgyResult $rawText }
