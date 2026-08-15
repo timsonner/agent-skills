@@ -68,6 +68,14 @@ Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 - **Path**: [opencode-harness/SKILL.md](opencode-harness/SKILL.md)
 - **Description**: Drive the OpenCode CLI (`opencode`) programmatically across terminal sessions with PTY-backed control.
 
+### GitHub Copilot CLI Harness
+- **Path**: [copilot-harness/SKILL.md](copilot-harness/SKILL.md)
+- **Description**: Drive the GitHub Copilot CLI (`copilot`) from another agent: one-shot `-p`/`--prompt`, resume/continue, models, skills. JSON-RPC Python is [copilot-sdk](copilot-sdk/SKILL.md).
+
+### Harness offload
+- **Path**: [harness-offload/SKILL.md](harness-offload/SKILL.md)
+- **Description**: One job shape for `agy` / `opencode` / `copilot`: worker, dir, prompt, allow_tools, session. Dispatcher: [Invoke-HarnessOffload.ps1](harness-offload/scripts/Invoke-HarnessOffload.ps1). Flags stay in the per-binary harness skills.
+
 ### Ralph Wiggum Pattern
 - **Path**: [ralph-wiggum-pattern/SKILL.md](ralph-wiggum-pattern/SKILL.md)
 - **Description**: Continuous feedback-loop coding: iterate on single items, delegate implementation, self-heal.
@@ -78,7 +86,7 @@ Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 
 ### GitHub Copilot Python SDK
 - **Path**: [copilot-sdk/SKILL.md](copilot-sdk/SKILL.md)
-- **Description**: Integrate with the GitHub Copilot CLI via a Python JSON-RPC SDK (technical preview).
+- **Description**: Integrate with the GitHub Copilot CLI via a Python JSON-RPC SDK (technical preview). To *invoke* the CLI from another agent, use [copilot-harness](copilot-harness/SKILL.md).
 
 ### Model Context Protocol (MCP) Server
 - **Path**: [mcp-server/SKILL.md](mcp-server/SKILL.md)

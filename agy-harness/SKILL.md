@@ -147,3 +147,4 @@ agy install          # PATH / aliases
 - Host is PowerShell: do not put Linux `2>/dev/null` in double-quoted strings
   (see **`wsl-containers`**).
 - Product docs: **`opencode/`** is a different harness. This skill is **agy only**.
+- Shared job shape (pick worker, get `session_id` + stdout): **`harness-offload`**.

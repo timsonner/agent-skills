@@ -15,6 +15,8 @@ metadata:
 
 Python SDK for programmatic control of GitHub Copilot CLI via JSON-RPC.
 
+To drive `copilot.exe` from another agent (one-shot `-p`, resume, winget), use **`copilot-harness`**.
+
 > **Note:** This SDK is in technical preview and may change in breaking ways.
 
 ## Installation
