@@ -41,6 +41,30 @@ Auth: first launch may use the enterprise Google account. Optional direct API:
 
 Settings file: `~/.gemini/antigravity-cli/settings.json`.
 
+Headless `--print` cannot prompt. Tools that need confirmation are **soft-denied**
+(stderr `jetski: … auto-denied`, exit 0, empty stdout). Workspace reads are
+supposed to be auto-allowed; in practice ListDir/`read_file` still asks, so
+print mode dies unless `permissions.allow` has the rule.
+
+Keep this **read-only** allowlist in settings (dispatcher also merges it):
+
+```json
+{
+  "allowNonWorkspaceAccess": true,
+  "permissions": {
+    "allow": [
+      "read_file(*)",
+      "command(*)"
+    ]
+  }
+}
+```
+
+`command(*)` is required because print-mode AGY prefers Bash (`Get-Location`,
+`(Get-Location).Path`, …) and prefix allow-rules never cover the next
+expression. Do **not** add `write_file(*)` — writes stay behind
+`--dangerously-skip-permissions` / `-AllowTools`.
+
 ## Drive from this host (one-shot)
 
 **`--print` consumes the next argument as the prompt.** Put the message immediately
@@ -143,6 +167,10 @@ agy install          # PATH / aliases
 - `--print --model foo "hi"` treats `--model` as the prompt. Flags **before** `--print`.
 - PATH stale after winget — refresh Machine+User Path.
 - `--dangerously-skip-permissions` skips tool prompts; only when the task is trusted.
+- Recurring `jetski` / `read_file` / `command` auto-deny in `--print`: missing
+  `permissions.allow` in `~/.gemini/antigravity-cli/settings.json`. Add
+  `read_file(*)` and `command(*)`. Do not “fix” it by always passing
+  `--dangerously-skip-permissions` (that also auto-approves writes).
 - If print mode is idle, fall back to **`opencode run`** for a deterministic one-shot.
 - Host is PowerShell: do not put Linux `2>/dev/null` in double-quoted strings
   (see **`wsl-containers`**).

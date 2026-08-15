@@ -53,6 +53,11 @@ $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';'
 Do **not** pass `--yolo` / `--auto` / `--dangerously-skip-permissions`
 yourself — the script maps `-AllowTools` to the matching flag.
 
+agy `--print` still needs a persisted allowlist or it jetskis
+(`read_file` / `command` auto-denied, empty stdout). The dispatcher merges
+`read_file(*)` and `command(*)` into `~/.gemini/antigravity-cli/settings.json`.
+That is not `-AllowTools` and does not allow `write_file`.
+
 The script appends: do not spawn agy / opencode / copilot / codex / hermes. Do not strip that.
 
 ## Rules
