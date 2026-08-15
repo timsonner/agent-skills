@@ -148,4 +148,6 @@ For the best experience on Windows, we recommend using [Windows Subsystem for Li
 
 Support for installing OpenCode on Windows using Bun is currently in progress.
 
+**Windows CLI (winget):** `winget install --id SST.opencode --accept-source-agreements --accept-package-agreements`
+
 You can also grab the binary from the [Releases](https://github.com/anomalyco/opencode/releases).

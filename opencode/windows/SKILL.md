@@ -18,6 +18,14 @@ For the best experience on Windows, we recommend using [Windows Subsystem for Li
 
 ## Installation Methods on Windows
 
+**Recommended:**
+
+```powershell
+winget install --id SST.opencode --accept-source-agreements --accept-package-agreements
+```
+
+Refresh PATH afterwards (`Machine` + `User`). CLI id: `SST.opencode`. Desktop: `SST.OpenCodeDesktop`.
+
 -   **Using Chocolatey**
     
     Terminal window

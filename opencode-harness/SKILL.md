@@ -1,72 +1,99 @@
 ---
 name: opencode-harness
-description: "Run the OpenCode CLI harness for coding tasks from a terminal session with interactive PTY support (harness-only)."
+description: >
+  Drive the OpenCode CLI (`opencode`) from another agent or terminal: install,
+  one-shot `opencode run`, TUI, models (including opencode/big-pickle), agents.
+  Windows winget SST.opencode. Triggers: "/opencode-harness", opencode, big pickle.
 author: Tim Sonner
 license: MIT
 ---
 
-# OpenCode Harness (CLI/TUI)
+# OpenCode harness (CLI)
 
-Use this when you want to offload coding tasks to the **OpenCode** CLI harness (`opencode`) from a terminal session using PTY-backed interactive control. This is the **harness-only** workflow (no deep product docs).
+Offload a coding or Q&A task to the **OpenCode** binary. Prefer **`opencode run`**
+from a host agent (no TUI). Use the TUI only when you have a real interactive PTY.
 
-## Prerequisites
-- `opencode` is installed and on PATH.
-- Auth is configured (e.g., `opencode auth login` or provider env vars).
-- Use **pty=true** for interactive TUI sessions.
+Verified against **opencode 1.18.x** (`SST.opencode` via winget). Re-check
+`opencode --help` if flags look stale.
 
-## Launch (interactive)
-Use a background PTY so you can send commands programmatically:
+## Install
 
-```bash
-terminal(command="opencode", background=true, pty=true, workdir="/path/to/repo")
-# save session_id
+**Windows (recommended):**
+
+```powershell
+winget install --id SST.opencode --accept-source-agreements --accept-package-agreements
 ```
 
-## Send Prompts
-```bash
-process(action="submit", session_id="<id>", data="Implement OAuth refresh flow and add tests")
-process(action="poll", session_id="<id>")
-process(action="log", session_id="<id>")
+Refresh **this process** PATH after install (a session started before winget will not see it):
+
+```powershell
+$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' +
+            [System.Environment]::GetEnvironmentVariable('Path','User')
+where.exe opencode
+opencode --version
 ```
 
-## Exit (clean)
-OpenCode does **not** support `/exit` (it opens an agent selector). Use Ctrl+C:
+Binary typically lands under
+`%LOCALAPPDATA%\Microsoft\WinGet\Packages\SST.opencode_*\opencode.exe`.
 
-```bash
-process(action="write", session_id="<id>", data="\x03")
-# or: process(action="kill", session_id="<id>")
+Other methods (script, npm, brew, scoop, choco): product skill **`opencode/install`**.
+Desktop app id is `SST.OpenCodeDesktop` — that is **not** this CLI.
+
+Auth: `opencode providers login` (alias `opencode auth login`) or provider env vars.
+
+## Drive from this host (one-shot)
+
+Do **not** invent `terminal()` / `process()` APIs. From Grok or PowerShell:
+
+```powershell
+opencode run --model opencode/big-pickle --dir <repo> "Your question or task"
 ```
 
-## One‑Shot Tasks (no TUI)
-```bash
-terminal(command="opencode run 'Refactor auth module and update tests'", workdir="/path/to/repo")
+Useful flags (`opencode run --help`):
+
+| Flag | Meaning |
+|---|---|
+| `-m` / `--model` | `provider/model` (e.g. `opencode/big-pickle`) |
+| `--agent` | `build` (default), `plan`, … — `opencode agent list` |
+| `--dir` | Project directory |
+| `-c` / `--continue` | Continue last session |
+| `-s` / `--session` | Continue a session id |
+| `--auto` | Auto-approve permissions (dangerous) |
+| `--format json` | Raw events |
+| `--thinking` | Show thinking blocks |
+
+List models: `opencode models`. Free OpenCode-hosted ids include `opencode/big-pickle`.
+
+Smoke:
+
+```powershell
+opencode run --model opencode/big-pickle "Respond with exactly: OPENCODE_SMOKE_OK"
 ```
 
-## Keybindings (TUI)
-- **Enter**: submit message (press twice if needed)
-- **Tab**: switch agents (build/plan)
+Success = stdout contains `OPENCODE_SMOKE_OK`.
+
+## TUI (human or PTY)
+
+```powershell
+opencode <project>          # default
+opencode -c                 # continue last
+opencode -s <session_id>
+```
+
+- **Enter**: submit (twice if needed)
+- **Tab**: switch agents
 - **Ctrl+P**: command palette
-- **Ctrl+X L**: switch session
-- **Ctrl+X M**: switch model
-- **Ctrl+X N**: new session
-- **Ctrl+X E**: open editor
-- **Ctrl+C**: exit
+- **Ctrl+X** then **M** / **N** / **L**: model / new / sessions
+- **Ctrl+C**: exit — `/exit` is **not** a quit command (opens an agent picker)
 
-## Resume Sessions
-```bash
-terminal(command="opencode -c", background=true, pty=true, workdir="/path/to/repo")
-terminal(command="opencode -s <session_id>", background=true, pty=true, workdir="/path/to/repo")
-```
-
-## Verification
-```bash
-terminal(command="opencode run 'Respond with exactly: OPENCODE_SMOKE_OK'")
-```
-Success = output includes `OPENCODE_SMOKE_OK`.
+Need a real PTY. A headless `run_terminal_command` without a TTY is the wrong way to
+drive the TUI; use `opencode run` instead.
 
 ## Pitfalls
-- Interactive TUI **requires** `pty=true`.
-- `/exit` is **not** valid; use **Ctrl+C**.
-- Avoid sharing one workdir across parallel OpenCode sessions.
-- If the TUI appears stuck, inspect logs before killing:
-  `process(action="log", session_id="<id>")`.
+
+- PATH stale after winget — refresh Machine+User Path in the **current** shell.
+- Do not share one `--dir` across parallel `opencode run` writers.
+- `--auto` skips permission prompts; only use when the task is trusted.
+- Product docs live under **`opencode/`** in this repo; this skill is **how to invoke** it.
+- Host is PowerShell: do not put Linux `2>/dev/null` in double-quoted strings
+  (see **`wsl-containers`** Host PowerShell vs Linux).

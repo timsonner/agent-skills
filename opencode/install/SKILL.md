@@ -74,9 +74,23 @@ paru -S opencode-bin              # Arch Linux (Latest from AUR)
 
 ### Windows
 
-Recommended: Use WSL
+**Recommended (native CLI):**
 
-For the best experience on Windows, we recommend using [Windows Subsystem for Linux (WSL)](/docs/windows-wsl). It provides better performance and full compatibility with OpenCode’s features.
+```powershell
+winget install --id SST.opencode --accept-source-agreements --accept-package-agreements
+```
+
+Then refresh PATH in the current shell (or open a new terminal):
+
+```powershell
+$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' +
+            [System.Environment]::GetEnvironmentVariable('Path','User')
+opencode --version
+```
+
+Package id **`SST.opencode`** is the CLI. **`SST.OpenCodeDesktop`** is the desktop app.
+
+WSL is optional, not required for `opencode run`. Other Windows package managers:
 
 -   **Using Chocolatey**
     
