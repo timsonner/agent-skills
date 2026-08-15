@@ -138,9 +138,37 @@ Debian slim often has **no** `/etc/apt/sources.list` (deb822 only).
 
 Build stages often wipe `/var/lib/apt/lists/*`. Ship `ping`/`curl`/`iproute2` in desktop images.
 
-Nested quotes / heredocs via `wslc exec … bash -lc '…'` fail often — write a script on a
-bind mount and exec the **file**. `wslc system session run` can finish without closing
-stdout; collect output then stop waiters.
+## Host PowerShell vs Linux (quoting)
+
+On Windows the agent usually launches `wslc` from **PowerShell**. That string is parsed
+**twice**: once by PowerShell, then by bash in the container or the session UVM.
+
+### What PowerShell rewrites
+
+| You meant (Linux) | What happened |
+|---|---|
+| `$pid`, `$SESSION_MODE`, `$?` | Expanded or emptied on the **host** (`EXIT:True`) |
+| `2>/dev/null` | Path `C:\dev\null` (`Could not find a part of the path`) |
+| `gdbus … "['yes']"` | Quote matching exploded |
+| `pgrep` / `pidof` in a mixed one-liner | PowerShell looks for a **cmdlet** |
+| Here-string of bash + CRLF | Linux sees `$'\r': command not found` |
+
+### What `wslc` itself drops
+
+- `wslc system session run` + long path / `sh -c` / CRLF → **`The handle is invalid`**
+- `wslc exec … bash -lc '…'` + heredoc, nested quotes, or `$` → quoting hell  
+  (same lesson in **`wslc-pentest-workflow`**: write the file, then exec the path)
+- Session `run` can **finish without closing stdout** — collect output, do not wait forever
+
+### Do this instead
+
+1. Write a `.sh` on the host with **LF** (UTF-8, no BOM). After copy: `sed -i 's/\r$//'`.
+2. Bind-mount or `tee` it in; run `bash /path/script.sh`. Do not inline gdbus/portal JSON.
+3. If you must one-line: put the **Linux** script in **single** quotes so PowerShell does
+   not expand `$`. Never put `2>/dev/null` inside a double-quoted PowerShell string —
+   use `2>&1` or a file.
+4. `system session`: short argv only (`/run/ash -c ls`, `/en <host-pid> -d /usr/local/bin/…`).
+5. `Add-Type` + `System.Drawing`: Windows PowerShell **5.1** — **`windows-ui-inject`**.
 
 ## Privileged / devices / session VM
 
@@ -155,8 +183,7 @@ wslc system session run docker exec priv id
 Or C# `ContainerSettings.Privileged = true` (`references/api-reference.md`).
 SDK sessions with a custom `Name`/`StoragePath` **do not** show up in `wslc ps`.
 
-Keep `system session run` commands **short** (wslc invalid-handle on long paths / `sh -c`
-with CRLF). Use `/run/ash` style helpers on the UVM when needed.
+Keep `system session run` commands **short** — see **Host PowerShell vs Linux** above.
 
 GPU: `--gpus all` → CDI `microsoft.com/wslc=gpu` / `/dev/dxg`. Not a universal OpenCL
 guarantee (`hashcat` often fails).
@@ -217,6 +244,9 @@ passwords stay in the **project**, not this skill.
 | C# containers missing from `wslc ps` | Different session storage than the CLI |
 | `hashcat` OpenCL | Often no platform; use CPU/`john` or host GPU |
 | NTFS bind + `chmod 600` | Copy key onto container-native fs first |
+| `$'\r': command not found` | Strip CR on scripts copied from Windows |
+| `C:\dev\null` | Do not put `2>/dev/null` in a double-quoted PowerShell string |
+| `The handle is invalid` | Shorten `system session` argv; no CRLF; no long `sh -c` |
 
 ## Cross-skill map
 
