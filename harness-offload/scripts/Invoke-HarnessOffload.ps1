@@ -1,11 +1,11 @@
-# Offload one bounded job to agy, opencode, copilot, or codex.
+# Offload one bounded job to agy, opencode, copilot, codex, or hermes.
 # Prints a single JSON object: worker, session_id, exit_code, stdout, dir, allow_tools, stderr.
 # Flag tables live in the matching *-harness skills — do not fork them here.
 
 [CmdletBinding()]
 param(
   [Parameter(Mandatory = $true)]
-  [ValidateSet("agy", "opencode", "copilot", "codex")]
+  [ValidateSet("agy", "opencode", "copilot", "codex", "hermes")]
   [string]$Worker,
 
   [Parameter(Mandatory = $true)]
@@ -38,12 +38,16 @@ function Resolve-WorkerExe([string]$name) {
     $official = Join-Path $env:LOCALAPPDATA "Programs\OpenAI\Codex\bin\codex.exe"
     if (Test-Path -LiteralPath $official) { return $official }
   }
+  if ($name -eq "hermes") {
+    $official = Join-Path $env:LOCALAPPDATA "hermes\hermes-agent\venv\Scripts\hermes.exe"
+    if (Test-Path -LiteralPath $official) { return $official }
+  }
   throw "Worker '$name' not on PATH. Refresh Machine+User Path or see the matching *-harness skill."
 }
 
 $exe = Resolve-WorkerExe $Worker
 
-$guard = "Do not invoke or spawn the agy, opencode, copilot, or codex CLIs. Complete this task yourself and stop."
+$guard = "Do not invoke or spawn the agy, opencode, copilot, codex, or hermes CLIs. Complete this task yourself and stop."
 $fullPrompt = if ($Prompt.Contains("Do not invoke or spawn the agy")) { $Prompt } else { "$Prompt`n`n$guard" }
 
 function Get-JsonObjects([string]$text) {
@@ -97,6 +101,20 @@ function Get-CopilotResult([object[]]$objs) {
     }
   }
   return @{ session_id = $sid; stdout = $text.Trim() }
+}
+
+function Get-HermesResult([string]$text) {
+  $sid = $null
+  $lines = New-Object System.Collections.Generic.List[string]
+  foreach ($line in ($text -split "`r?`n")) {
+    if ($line -match '^\s*session_id:\s*(\S+)\s*$') {
+      $sid = $Matches[1]
+      continue
+    }
+    if ($line -match '^\s*↻ Resumed session') { continue }
+    $lines.Add($line)
+  }
+  return @{ session_id = $sid; stdout = ($lines -join "`n").Trim() }
 }
 
 function Get-CodexResult([object[]]$objs) {
@@ -155,14 +173,34 @@ switch ($Worker) {
     if ($Session) { $argList.Add($Session) }
     $argList.Add($fullPrompt)
   }
+  "hermes" {
+    $argList.Add("chat")
+    $argList.Add("-q"); $argList.Add($fullPrompt)
+    $argList.Add("-Q")
+    $argList.Add("--accept-hooks")
+    if ($Model) { $argList.Add("-m"); $argList.Add($Model) }
+    if ($AllowTools) { $argList.Add("--yolo") }
+    if ($Session) { $argList.Add("--resume"); $argList.Add($Session) }
+  }
 }
 
 $stderrFile = [System.IO.Path]::GetTempFileName()
 Push-Location -LiteralPath $Dir
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+$prevNative = $null
+if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
+  $prevNative = $PSNativeCommandUseErrorActionPreference
+  $PSNativeCommandUseErrorActionPreference = $false
+}
 try {
+  # Call operator keeps each arg intact (Start-Process splits -Prompt).
+  # Native stderr must not become a terminating NativeCommandError.
   $raw = & $exe @argList 2>$stderrFile
   $exit = $LASTEXITCODE
 } finally {
+  $ErrorActionPreference = $prevEap
+  if ($null -ne $prevNative) { $PSNativeCommandUseErrorActionPreference = $prevNative }
   Pop-Location
 }
 if ($null -eq $exit) { $exit = 0 }
@@ -178,6 +216,15 @@ switch ($Worker) {
   "opencode" { $parsed = Get-OpencodeResult (Get-JsonObjects $rawText) }
   "copilot" { $parsed = Get-CopilotResult (Get-JsonObjects $rawText) }
   "codex" { $parsed = Get-CodexResult (Get-JsonObjects $rawText) }
+  "hermes" {
+    $parsed = Get-HermesResult $rawText
+    if (-not $parsed.session_id) {
+      $fromErr = Get-HermesResult $errText
+      if ($fromErr.session_id) { $parsed.session_id = $fromErr.session_id }
+    }
+    # hermes writes session_id to stderr; pwsh may then report a fake exit 1.
+    if ($parsed.session_id -and $parsed.stdout -and $exit -ne 0) { $exit = 0 }
+  }
 }
 
 $result = [ordered]@{

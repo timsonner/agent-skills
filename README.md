@@ -76,9 +76,13 @@ Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 - **Path**: [codex-harness/SKILL.md](codex-harness/SKILL.md)
 - **Description**: Drive the OpenAI Codex CLI (`codex exec`) from another agent: official Windows installer, JSONL, resume. ChatGPT device login or `CODEX_API_KEY`.
 
+### Hermes Agent CLI Harness
+- **Path**: [hermes-harness/SKILL.md](hermes-harness/SKILL.md)
+- **Description**: Drive Nous Hermes Agent (`hermes -z` / `chat -q -Q`) from another agent. Official install.ps1. Gateway/Buzz is [buzz-hermes-gateway](buzz-hermes-gateway/SKILL.md).
+
 ### Harness offload
 - **Path**: [harness-offload/SKILL.md](harness-offload/SKILL.md)
-- **Description**: One job shape for `agy` / `opencode` / `copilot` / `codex`: worker, dir, prompt, allow_tools, session. Dispatcher: [Invoke-HarnessOffload.ps1](harness-offload/scripts/Invoke-HarnessOffload.ps1). Flags stay in the per-binary harness skills.
+- **Description**: One job shape for `agy` / `opencode` / `copilot` / `codex` / `hermes`: worker, dir, prompt, allow_tools, session. Dispatcher: [Invoke-HarnessOffload.ps1](harness-offload/scripts/Invoke-HarnessOffload.ps1). Flags stay in the per-binary harness skills.
 
 ### Ralph Wiggum Pattern
 - **Path**: [ralph-wiggum-pattern/SKILL.md](ralph-wiggum-pattern/SKILL.md)

@@ -1,7 +1,7 @@
 ---
 name: harness-offload
 description: >
-  Offload one bounded job to agy, opencode, copilot, or codex via a shared contract
+  Offload one bounded job to agy, opencode, copilot, codex, or hermes via a shared contract
   (worker, dir, prompt, allow_tools, session). Use when the host agent should
   hand a task to another CLI and get back session_id + stdout. Triggers:
   "/harness-offload", offload contract, Invoke-HarnessOffload.
@@ -13,15 +13,14 @@ license: MIT
 
 Host agent stays orchestrator. One worker, one directory, one prompt, then stop.
 
-Flags and install live in **`agy-harness`**, **`opencode-harness`**,
-**`copilot-harness`**, **`codex-harness`**. This skill is only the job shape
-and the dispatcher.
+Flags and install live in the matching `*-harness` skills. This skill is only
+the job shape and the dispatcher.
 
 ## Contract
 
 | Field | Meaning |
 |---|---|
-| `worker` | `agy` \| `opencode` \| `copilot` \| `codex` (caller chooses) |
+| `worker` | `agy` \| `opencode` \| `copilot` \| `codex` \| `hermes` |
 | `dir` | workspace; sessions are per-dir (defaults to cwd) |
 | `prompt` | bounded task |
 | `allow_tools` | off = Q&A; on = that worker’s documented auto-approve |
@@ -54,7 +53,7 @@ $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';'
 Do **not** pass `--yolo` / `--auto` / `--dangerously-skip-permissions`
 yourself — the script maps `-AllowTools` to the matching flag.
 
-The script appends: do not spawn agy / opencode / copilot / codex. Do not strip that.
+The script appends: do not spawn agy / opencode / copilot / codex / hermes. Do not strip that.
 
 ## Rules
 
@@ -74,6 +73,7 @@ $script = ".\harness-offload\scripts\Invoke-HarnessOffload.ps1"
 & $script -Worker opencode -Dir $tmp -Prompt "Respond with exactly: OPENCODE_SMOKE_OK"
 & $script -Worker copilot -Dir $tmp -Prompt "Respond with exactly: COPILOT_SMOKE_OK"
 & $script -Worker codex -Dir $tmp -Prompt "Respond with exactly: CODEX_SMOKE_OK"
+& $script -Worker hermes -Dir $tmp -Prompt "Respond with exactly: HERMES_SMOKE_OK"
 ```
 
 Each JSON `stdout` must contain that worker’s `*_SMOKE_OK` string and a

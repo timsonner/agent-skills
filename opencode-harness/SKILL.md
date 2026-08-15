@@ -172,4 +172,4 @@ Do not put API keys in committed jsonc.
 - `opencode serve` without `OPENCODE_SERVER_PASSWORD` prints **unsecured**.
 - `debug skill` may show old copies under `~/.claude/skills` — prefer `skills.paths`
   to **`agent-skills`**.
-- Shared job shape (agy / opencode / copilot / **codex**): **`harness-offload`**.
+- Shared job shape: **`harness-offload`**.

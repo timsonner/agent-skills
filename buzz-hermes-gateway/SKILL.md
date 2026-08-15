@@ -193,6 +193,7 @@ For agents that stay online without Desktop, use **buzz-acp** + a dedicated key 
 
 ## See also
 
+- `hermes-harness` — drive `hermes` CLI (`-z`, `chat -q`, ACP) from another agent
 - `buzz-relay-self-host` — relay compose, reverse proxy, Desktop onboarding, mobile pairing, avatars, buzz-acp
 - `buzz-relay-self-host/references/hermes-gateway.md` — expanded wiring table
 - https://hermes-agent.nousresearch.com/docs/user-guide/messaging/buzz
