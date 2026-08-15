@@ -255,4 +255,4 @@ copilot help [topic]         # config, permissions, environment, logging, …
 - `-p "/env"` is not a slash command; use TUI or ACP `session/prompt`.
 - `--agent` without a canary in the profile looks like a no-op on identity
   questions. Skill use needs `--allow-all-tools` (tool name `skill`).
-- Shared job shape (pick worker, get `session_id` + stdout): **`harness-offload`**.
+- Shared job shape (agy / opencode / copilot / **codex**): **`harness-offload`**.

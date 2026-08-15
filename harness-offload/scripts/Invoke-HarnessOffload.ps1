@@ -1,11 +1,11 @@
-# Offload one bounded job to agy, opencode, or copilot.
-# Prints a single JSON object: worker, session_id, exit_code, stdout, dir, allow_tools.
-# Flag tables live in agy-harness / opencode-harness / copilot-harness — do not fork them here.
+# Offload one bounded job to agy, opencode, copilot, or codex.
+# Prints a single JSON object: worker, session_id, exit_code, stdout, dir, allow_tools, stderr.
+# Flag tables live in the matching *-harness skills — do not fork them here.
 
 [CmdletBinding()]
 param(
   [Parameter(Mandatory = $true)]
-  [ValidateSet("agy", "opencode", "copilot")]
+  [ValidateSet("agy", "opencode", "copilot", "codex")]
   [string]$Worker,
 
   [Parameter(Mandatory = $true)]
@@ -31,13 +31,19 @@ if (-not (Test-Path -LiteralPath $Dir -PathType Container)) {
   throw "Dir is not a directory: $Dir"
 }
 
-$cmd = Get-Command $Worker -ErrorAction SilentlyContinue
-if (-not $cmd) {
-  throw "Worker '$Worker' not on PATH. Refresh Machine+User Path or see the matching *-harness skill."
+function Resolve-WorkerExe([string]$name) {
+  $cmd = Get-Command $name -ErrorAction SilentlyContinue
+  if ($cmd) { return $cmd.Source }
+  if ($name -eq "codex") {
+    $official = Join-Path $env:LOCALAPPDATA "Programs\OpenAI\Codex\bin\codex.exe"
+    if (Test-Path -LiteralPath $official) { return $official }
+  }
+  throw "Worker '$name' not on PATH. Refresh Machine+User Path or see the matching *-harness skill."
 }
-$exe = $cmd.Source
 
-$guard = "Do not invoke or spawn the agy, opencode, or copilot CLIs. Complete this task yourself and stop."
+$exe = Resolve-WorkerExe $Worker
+
+$guard = "Do not invoke or spawn the agy, opencode, copilot, or codex CLIs. Complete this task yourself and stop."
 $fullPrompt = if ($Prompt.Contains("Do not invoke or spawn the agy")) { $Prompt } else { "$Prompt`n`n$guard" }
 
 function Get-JsonObjects([string]$text) {
@@ -93,6 +99,18 @@ function Get-CopilotResult([object[]]$objs) {
   return @{ session_id = $sid; stdout = $text.Trim() }
 }
 
+function Get-CodexResult([object[]]$objs) {
+  $sid = $null
+  $text = ""
+  foreach ($o in $objs) {
+    if ($o.type -eq "thread.started" -and $o.thread_id) { $sid = [string]$o.thread_id }
+    if ($o.type -eq "item.completed" -and $o.item -and $o.item.type -eq "agent_message" -and $o.item.text) {
+      $text = [string]$o.item.text
+    }
+  }
+  return @{ session_id = $sid; stdout = $text.Trim() }
+}
+
 $argList = New-Object System.Collections.Generic.List[string]
 
 switch ($Worker) {
@@ -123,6 +141,20 @@ switch ($Worker) {
     if ($Session) { $argList.Add("--resume=$Session") }
     $argList.Add("-p"); $argList.Add($fullPrompt)
   }
+  "codex" {
+    $argList.Add("exec")
+    if ($Session) { $argList.Add("resume") }
+    $argList.Add("--json")
+    $argList.Add("--skip-git-repo-check")
+    # -C is exec-only; resume is already bound to the thread's cwd.
+    if (-not $Session) { $argList.Add("-C"); $argList.Add($Dir) }
+    if ($Model) { $argList.Add("--model"); $argList.Add($Model) }
+    if ($AllowTools) {
+      $argList.Add("--sandbox"); $argList.Add("danger-full-access")
+    }
+    if ($Session) { $argList.Add($Session) }
+    $argList.Add($fullPrompt)
+  }
 }
 
 $stderrFile = [System.IO.Path]::GetTempFileName()
@@ -145,6 +177,7 @@ switch ($Worker) {
   "agy" { $parsed = Get-AgyResult $rawText }
   "opencode" { $parsed = Get-OpencodeResult (Get-JsonObjects $rawText) }
   "copilot" { $parsed = Get-CopilotResult (Get-JsonObjects $rawText) }
+  "codex" { $parsed = Get-CodexResult (Get-JsonObjects $rawText) }
 }
 
 $result = [ordered]@{

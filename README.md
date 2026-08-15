@@ -72,9 +72,13 @@ Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 - **Path**: [copilot-harness/SKILL.md](copilot-harness/SKILL.md)
 - **Description**: Drive the GitHub Copilot CLI (`copilot`) from another agent: one-shot `-p`/`--prompt`, resume/continue, models, skills. JSON-RPC Python is [copilot-sdk](copilot-sdk/SKILL.md).
 
+### OpenAI Codex CLI Harness
+- **Path**: [codex-harness/SKILL.md](codex-harness/SKILL.md)
+- **Description**: Drive the OpenAI Codex CLI (`codex exec`) from another agent: official Windows installer, JSONL, resume. ChatGPT device login or `CODEX_API_KEY`.
+
 ### Harness offload
 - **Path**: [harness-offload/SKILL.md](harness-offload/SKILL.md)
-- **Description**: One job shape for `agy` / `opencode` / `copilot`: worker, dir, prompt, allow_tools, session. Dispatcher: [Invoke-HarnessOffload.ps1](harness-offload/scripts/Invoke-HarnessOffload.ps1). Flags stay in the per-binary harness skills.
+- **Description**: One job shape for `agy` / `opencode` / `copilot` / `codex`: worker, dir, prompt, allow_tools, session. Dispatcher: [Invoke-HarnessOffload.ps1](harness-offload/scripts/Invoke-HarnessOffload.ps1). Flags stay in the per-binary harness skills.
 
 ### Ralph Wiggum Pattern
 - **Path**: [ralph-wiggum-pattern/SKILL.md](ralph-wiggum-pattern/SKILL.md)
