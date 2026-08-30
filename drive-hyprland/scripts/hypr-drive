@@ -21,7 +21,9 @@ Usage: hypr-drive <command> [args]
                           ydotool click at the current pointer
   type <text>             type into the focused window (wtype)
   key <Key>               press and release a named key (wtype -k Return)
-  combo <ctrl+l>          modifier combo via wtype -M/-m
+  combo <ctrl+l>          modifier combo via wtype -M/-m (client only, not Super+WM)
+  scratchpad              Super+S — toggle special:scratchpad
+  menu                    Super+Space — omarchy-menu toggle
 EOF
 }
 
@@ -250,6 +252,16 @@ case "$cmd" in
   combo)
     [ -n "${1:-}" ] || { usage >&2; exit 1; }
     wtype_combo "$1"
+    ;;
+  scratchpad)
+    dispatch 'hl.dsp.workspace.toggle_special("scratchpad")'
+    ;;
+  menu)
+    if command -v omarchy-menu >/dev/null; then
+      omarchy-menu toggle
+    else
+      dispatch 'hl.dsp.exec_cmd("omarchy-menu toggle")'
+    fi
     ;;
   ""|-h|--help|help) usage ;;
   *) usage >&2; exit 1 ;;

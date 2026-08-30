@@ -135,9 +135,35 @@ Screenshot (grim; negative geometry is valid):
 ./scripts/hypr-drive screenshot-class google-chrome
 ```
 
-Scratchpad: `hyprctl dispatch 'hl.dsp.workspace.toggle_special("scratchpad")'`  
 Launch: `hyprctl dispatch 'hl.dsp.exec_cmd("ghostty")'`  
 Close: `hl.dispatch(hl.dsp.window.close({ window = w }))`
+
+## Compositor binds vs client keys
+
+`wtype` / `hypr-drive combo` injects into the **focused client** (`zwp_virtual_keyboard_v1`). Hyprland never sees Super. `hypr-drive combo super+s` will not toggle the scratchpad.
+
+Look up the bind, then run **that action**:
+
+```bash
+# Omarchy defaults: $OMARCHY_PATH/default/hypr/bindings/*.lua
+# Live list: hyprctl binds -j  (Lua binds show dispatcher=__lua — you cannot
+# re-invoke by that index; copy the action from the lua source.)
+```
+
+Stock Omarchy (modmask 64 = SUPER):
+
+| Key | Bind | Drive with |
+|---|---|---|
+| Super+S | `hl.dsp.workspace.toggle_special("scratchpad")` | `./scripts/hypr-drive scratchpad` |
+| Super+Alt+S | `hl.dsp.window.move({ workspace = "special:scratchpad", follow = false })` | `hyprctl dispatch 'hl.dsp.window.move({ workspace = "special:scratchpad", follow = false })'` |
+| Super+Space | `omarchy-menu toggle` | `./scripts/hypr-drive menu` |
+
+```bash
+hyprctl dispatch 'hl.dsp.workspace.toggle_special("scratchpad")'
+omarchy-menu toggle
+```
+
+`ydotool key` (uinput) *might* reach Hyprland as a real Super; prefer the dispatcher/`omarchy-menu` so the action does not depend on focus or key timing.
 
 ## Click and type
 
@@ -153,6 +179,7 @@ pointer. Do **not** `ydotool mousemove --absolute` with Hyprland `at` values
 Click codes: left `0xC0`, right `0xC1`, middle `0xC2`.
 
 **Keyboard:** `wtype` (`zwp_virtual_keyboard_v1`) on Hyprland. Focus first.
+Use this for **in-app** keys (Ctrl+L, Return, typing). Not for Super+… window-manager binds.
 
 ```bash
 ./scripts/hypr-drive focus-class google-chrome
@@ -173,6 +200,7 @@ keycodes if you need `ydotool key` (GNOME; optional here). Super = 125.
 - Use `hl.dsp.workspace.change_id` to switch workspaces
 - Edit `~/.config/hypr/` from this skill
 - Drive this session with `agent-workstation-drive` / `windows-ui-inject`
+- `wtype` / `combo super+…` for compositor binds (scratchpad, menu, workspaces)
 
 ## Dispatchers
 
