@@ -133,6 +133,10 @@ Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
 
 ## Special Navigation & Browser Helpers
 
+### Drive Hyprland (local Linux session)
+- **Path**: [drive-hyprland/SKILL.md](drive-hyprland/SKILL.md)
+- **Description**: Drive the live Hyprland compositor: workspaces, focus, cursor, grim screenshots, Chrome `--new-tab`, `wtype` typing, `ydotool` clicks. Setup/install: [drive-hyprland/scripts/install.sh](drive-hyprland/scripts/install.sh) (`host` = packages + `/dev/uinput` + `ydotoold`; `harness` = symlink into `~/.grok/skills` etc.). Linux counterpart of **windows-ui-inject**. Not the RDP container loop.
+
 ### Windows UI inject
 - **Path**: [windows-ui-inject/SKILL.md](windows-ui-inject/SKILL.md)
 - **Description**: Inject clicks/keys on Windows via PowerShell and `user32` when computer-use is screenshot-only. Browsers under tier “read” **and** mstsc (Connect vs Learn more, PID-scoped windows, CredUI limits, cmdkey). Script: [Invoke-MstscConnect.ps1](windows-ui-inject/scripts/Invoke-MstscConnect.ps1). Prefer Windows PowerShell 5.1 for `Add-Type` + System.Drawing.

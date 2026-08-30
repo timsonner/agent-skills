@@ -2,7 +2,7 @@
 
 **You got here by cloning (or being pointed at) this repository.** That is enough to start.
 
-If you can run shell on Windows and read skills under this clone, you can operate a **graphical Linux workstation** (and the containers on that host).
+If you can run shell on Windows and read skills under this clone, you can operate a **graphical Linux workstation** (and the containers on that host). On a **local Hyprland** Linux session, load **`drive-hyprland`** instead of the RDP loop.
 
 ## Load first (paths relative to this repo root)
 
@@ -10,6 +10,7 @@ If you can run shell on Windows and read skills under this clone, you can operat
 2. **`gnome-wayland-rdp/SKILL.md`** — GNOME Wayland + GRD server  
 3. **`kde-wayland-rdp/SKILL.md`** — Plasma Wayland + KRdp server  
 4. **`windows-ui-inject/SKILL.md`** — mstsc / UI injection (alias: `browser-read-bypass`)  
+5. **`drive-hyprland/SKILL.md`** — local Hyprland session (workspaces, click, type). Setup: `drive-hyprland/scripts/install.sh host` then `harness`.  
 
 Bootstrap prompt: `agent-workstation-drive/references/first-session-prompt.md`  
 Harness install: `agent-workstation-drive/references/harness-install.md`  

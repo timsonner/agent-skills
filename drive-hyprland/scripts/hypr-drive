@@ -1,0 +1,256 @@
+#!/usr/bin/env bash
+# Drive the live Hyprland session. Lua config: never use legacy dispatch syntax.
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: hypr-drive <command> [args]
+
+  windows                 list class, title, workspace, geometry
+  workspaces              list workspaces
+  monitors                list monitors
+  active                  active window + workspace
+  focus-workspace <id>    switch to workspace id (1..)
+  focus-class <class>     focus first window with this class
+  focus-title <substr>    focus first window whose title contains substr
+  cursor <x> <y>          move cursor (layout coordinates)
+  screenshot-class <cls>  grim that window to /tmp/hypr-drive-*.png
+  screenshot-title <s>    grim matching title
+  open-url <url>          new tab in existing Chrome/Chromium
+  click [left|right|middle]
+                          ydotool click at the current pointer
+  type <text>             type into the focused window (wtype)
+  key <Key>               press and release a named key (wtype -k Return)
+  combo <ctrl+l>          modifier combo via wtype -M/-m
+EOF
+}
+
+json_clients() { hyprctl clients -j; }
+
+dispatch() {
+  hyprctl dispatch "$1"
+}
+
+lua() {
+  hyprctl repl "$1"
+}
+
+cmd_windows() {
+  json_clients | python3 -c '
+import json,sys
+for c in json.load(sys.stdin):
+    ws = c.get("workspace") or {}
+    at, size = c.get("at") or [0,0], c.get("size") or [0,0]
+    cls = c.get("class") or ""
+    title = c.get("title") or ""
+    print("%-28s ws=%s %-22s %s,%s %sx%s  %s" % (
+        cls, ws.get("id"), ws.get("name") or "", at[0], at[1], size[0], size[1], title))
+'
+}
+
+cmd_workspaces() {
+  hyprctl workspaces -j | python3 -c '
+import json,sys
+for w in sorted(json.load(sys.stdin), key=lambda x: x.get("id", 0)):
+    print("id=%s name=%s mon=%s windows=%s" % (
+        w.get("id"), w.get("name"), w.get("monitor"), w.get("windows")))
+'
+}
+
+cmd_monitors() {
+  hyprctl monitors -j | python3 -c '
+import json,sys
+for m in json.load(sys.stdin):
+    aw = m.get("activeWorkspace") or {}
+    print("%s %s,%s %sx%s scale=%s ws=%s" % (
+        m.get("name"), m.get("x"), m.get("y"), m.get("width"), m.get("height"),
+        m.get("scale"), aw.get("id")))
+'
+}
+
+cmd_active() {
+  python3 - <<'PY'
+import json,subprocess
+w=json.loads(subprocess.check_output(["hyprctl","activewindow","-j"]))
+ws=json.loads(subprocess.check_output(["hyprctl","activeworkspace","-j"]))
+print(f"workspace {ws.get('id')} ({ws.get('name')}) on {ws.get('monitor')}")
+print(f"window {w.get('class')} | {w.get('title')} | {w.get('address')}")
+PY
+}
+
+pick_client() {
+  local kind="$1" needle="$2"
+  json_clients | python3 -c '
+import json,sys
+kind, needle = sys.argv[1], sys.argv[2].lower()
+for c in json.load(sys.stdin):
+    if kind == "class" and (c.get("class") or "").lower() == needle:
+        json.dump(c, sys.stdout); break
+    if kind == "title" and needle in (c.get("title") or "").lower():
+        json.dump(c, sys.stdout); break
+else:
+    sys.exit(2)
+' "$kind" "$needle"
+}
+
+lua_quote() {
+  python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$1"
+}
+
+focus_client() {
+  local kind="$1" needle="$2"
+  pick_client "$kind" "$needle" >/dev/null
+  local qkind qneedle
+  qkind="$(lua_quote "$kind")"
+  qneedle="$(lua_quote "$needle")"
+  lua "
+local kind, needle = $qkind, $qneedle
+local w
+for _,c in ipairs(hl.get_windows()) do
+  if kind == 'class' and tostring(c.class or ''):lower() == needle:lower() then w = c; break end
+  if kind == 'title' and tostring(c.title or ''):lower():find(needle:lower(), 1, true) then w = c; break end
+end
+if not w then return 'not found' end
+hl.dispatch(hl.dsp.focus({ window = w }))
+return w.class .. ' | ' .. tostring(w.title)
+"
+}
+
+screenshot_client() {
+  local kind="$1" needle="$2"
+  local geom path
+  geom="$(pick_client "$kind" "$needle" | python3 -c 'import json,sys; c=json.load(sys.stdin); x,y=c["at"]; w,h=c["size"]; print(f"{x},{y} {w}x{h}")')"
+  path="/tmp/hypr-drive-$(date +%s).png"
+  grim -g "$geom" "$path"
+  echo "$path  $geom"
+}
+
+ydotool_click() {
+  local button="${1:-left}"
+  local code
+  case "$button" in
+    left) code=0xC0 ;;
+    right) code=0xC1 ;;
+    middle) code=0xC2 ;;
+    *) echo "click: use left|right|middle" >&2; exit 1 ;;
+  esac
+  if ! command -v ydotool >/dev/null; then
+    echo "ydotool not installed. From this skill: ./scripts/install.sh host" >&2
+    exit 1
+  fi
+  if [ ! -S "${XDG_RUNTIME_DIR:-/run/user/$UID}/.ydotool_socket" ]; then
+    echo "ydotool socket missing. ./scripts/install.sh host  (then install.sh verify)" >&2
+    exit 1
+  fi
+  ydotool click "$code"
+}
+
+wtype_type() {
+  command -v wtype >/dev/null || { echo "wtype not on PATH" >&2; exit 1; }
+  wtype -- "$@"
+}
+
+wtype_key() {
+  command -v wtype >/dev/null || { echo "wtype not on PATH" >&2; exit 1; }
+  wtype -k "$1"
+}
+
+wtype_combo() {
+  command -v wtype >/dev/null || { echo "wtype not on PATH" >&2; exit 1; }
+  local spec="$1"
+  local -a mods=()
+  local key=""
+  local IFS='+'
+  # shellcheck disable=SC2086
+  set -- $spec
+  local i part
+  for part in "$@"; do
+    part="${part,,}"
+    case "$part" in
+      ctrl|control) mods+=("ctrl") ;;
+      alt) mods+=("alt") ;;
+      shift) mods+=("shift") ;;
+      super|logo|win|meta) mods+=("logo") ;;
+      *) key="$part" ;;
+    esac
+  done
+  [ -n "$key" ] || { echo "combo: need a key, e.g. ctrl+l" >&2; exit 1; }
+  local -a args=()
+  for part in "${mods[@]}"; do
+    args+=(-M "$part")
+  done
+  args+=(-k "$key")
+  for part in "${mods[@]}"; do
+    args+=(-m "$part")
+  done
+  wtype "${args[@]}"
+}
+
+open_url() {
+  local url="$1"
+  if command -v google-chrome-stable >/dev/null; then
+    google-chrome-stable --new-tab "$url"
+  elif command -v google-chrome >/dev/null; then
+    google-chrome --new-tab "$url"
+  elif command -v chromium >/dev/null; then
+    chromium --new-tab "$url"
+  else
+    echo "no chrome/chromium on PATH" >&2
+    exit 1
+  fi
+}
+
+cmd="${1:-}"
+shift || true
+case "$cmd" in
+  windows) cmd_windows ;;
+  workspaces) cmd_workspaces ;;
+  monitors) cmd_monitors ;;
+  active) cmd_active ;;
+  focus-workspace)
+    [ -n "${1:-}" ] || { usage >&2; exit 1; }
+    dispatch "hl.dsp.focus({ workspace = $1 })"
+    ;;
+  focus-class)
+    [ -n "${1:-}" ] || { usage >&2; exit 1; }
+    focus_client class "$1"
+    ;;
+  focus-title)
+    [ -n "${1:-}" ] || { usage >&2; exit 1; }
+    focus_client title "$1"
+    ;;
+  cursor)
+    [ -n "${1:-}" ] && [ -n "${2:-}" ] || { usage >&2; exit 1; }
+    lua "return hl.dispatch(hl.dsp.cursor.move({ x = $1, y = $2 }))" >/dev/null
+    hyprctl cursorpos
+    ;;
+  screenshot-class)
+    [ -n "${1:-}" ] || { usage >&2; exit 1; }
+    screenshot_client class "$1"
+    ;;
+  screenshot-title)
+    [ -n "${1:-}" ] || { usage >&2; exit 1; }
+    screenshot_client title "$1"
+    ;;
+  open-url)
+    [ -n "${1:-}" ] || { usage >&2; exit 1; }
+    open_url "$1"
+    ;;
+  click)
+    ydotool_click "${1:-left}"
+    ;;
+  type)
+    [ -n "${1:-}" ] || { usage >&2; exit 1; }
+    wtype_type "$@"
+    ;;
+  key)
+    [ -n "${1:-}" ] || { usage >&2; exit 1; }
+    wtype_key "$1"
+    ;;
+  combo)
+    [ -n "${1:-}" ] || { usage >&2; exit 1; }
+    wtype_combo "$1"
+    ;;
+  ""|-h|--help|help) usage ;;
+  *) usage >&2; exit 1 ;;
+esac
