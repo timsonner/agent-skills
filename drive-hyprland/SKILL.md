@@ -150,18 +150,43 @@ Look up the bind, then run **that action**:
 # re-invoke by that index; copy the action from the lua source.)
 ```
 
-Stock Omarchy (modmask 64 = SUPER):
+Do **not** wrap every Omarchy key in `hypr-drive`. Full list: `omarchy menu keybindings --print` or `~/Documents/omarchy-shortcuts-discussed.md`. Copy the **action**, then `hl.dispatch(...)` or run the command.
 
-| Key | Bind | Drive with |
-|---|---|---|
-| Super+S | `hl.dsp.workspace.toggle_special("scratchpad")` | `./scripts/hypr-drive scratchpad` |
-| Super+Alt+S | `hl.dsp.window.move({ workspace = "special:scratchpad", follow = false })` | `hyprctl dispatch 'hl.dsp.window.move({ workspace = "special:scratchpad", follow = false })'` |
-| Super+Space | `omarchy-menu toggle` | `./scripts/hypr-drive menu` |
+Stock Omarchy (modmask 64 = SUPER). Helpers only for the two we keep hitting:
+
+| Key | Action |
+|---|---|
+| Super+S | `./scripts/hypr-drive scratchpad` → `toggle_special("scratchpad")` |
+| Super+Alt+S | `hl.dsp.window.move({ workspace = "special:scratchpad", follow = false })` |
+| Super+Space | `./scripts/hypr-drive menu` → `omarchy-menu toggle` |
+| Super+1–0 | `hl.dsp.focus({ workspace = N })` — **0 is workspace 10** |
+| Super+Tab / Shift+Tab | `hl.dsp.focus({ workspace = "e+1" })` / `"e-1"` |
+| Super+Ctrl+Tab | `hl.dsp.focus({ workspace = "previous" })` |
+| Super+Shift+N | `hl.dsp.window.move({ workspace = N })` (follows). Add `follow = false` for Shift+Alt |
+| Super+Left/Right/Up/Down | `hl.dsp.focus({ direction = "l" })` — `l`/`r`/`u`/`d` |
+| Ctrl+Alt+Tab | `hl.dsp.focus({ monitor = "+1" })` |
+| Super+W | `hl.dsp.window.close()` |
+| Super+T | `hl.dsp.window.float({ action = "toggle" })` |
+| Super+F | `hl.dsp.window.fullscreen({ mode = "fullscreen" })` |
+| Super+Alt+F | `hl.dsp.window.fullscreen({ mode = "maximized" })` |
+| Super+J | `hl.dsp.layout("togglesplit")` |
+| Super+G | `hl.dsp.group.toggle()` |
+| Super+Alt+Tab | `hl.dsp.group.next()` |
+| Super+Return | `omarchy-launch-terminal` / `{ omarchy = "terminal" }` |
+| Super+O | **this machine:** `~/.config/hypr/window-pop-fit.sh` (not stock `omarchy-hyprland-window-pop`) |
+| Alt+Tab | `cycle_next` + `bring_to_top` **unless** active class matches `freerdp` — then do **not** dispatch (Windows gets the keys) |
+| Super+Shift+Alt+Left | `hl.dsp.workspace.move({ monitor = "l" })` |
+
+Always `hl.dispatch(...)`. Example:
 
 ```bash
-hyprctl dispatch 'hl.dsp.workspace.toggle_special("scratchpad")'
-omarchy-menu toggle
+hyprctl dispatch 'hl.dsp.focus({ direction = "l" })'
+hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = "maximized" })'
 ```
+
+**Not dispatchers** (in-app / `wtype` after focus): Ghostty splits (Ctrl+Shift+E/O), Herdr prefix (Ctrl+Space, release, then key), Omawrite Ctrl+P, font zoom.
+
+**Do not add a helper for** Ctrl+Alt+Del (`omarchy-hyprland-window-close-all`).
 
 `ydotool key` (uinput) *might* reach Hyprland as a real Super; prefer the dispatcher/`omarchy-menu` so the action does not depend on focus or key timing.
 
