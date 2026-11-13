@@ -1,221 +1,175 @@
-# Agent Skills Repository
+# Agent skills
 
-Structured, reusable skills for AI coding agents and harnesses (Grok, Claude Code, Cursor, OpenCode, and similar). Clone this repo, point the harness at it (or copy skills in), and agents can load capabilities without prior session memory.
+## What it is
+
+This repository is a collection of skills for coding-agent harnesses (Grok, Claude Code, Cursor, OpenCode, and similar). A skill is a directory with a `SKILL.md` file. The YAML frontmatter has `name` and `description`. Some skills also ship `scripts/` and `references/` next to that file.
+
+Clone the repo and point the harness at the clone, or copy the skill directories into the harness skill folder. The agent then reads the playbooks from the files. [AGENTS.md](AGENTS.md) is the cross-harness bootstrap for the graphical workstation loop.
+
+The package is this git repository. It does not build an application, and it does not contain a GNOME or Plasma container image. Supply that image from a separate lab project. Shared skills use placeholders (`<host>`, `<port>`, `<user>`) for lab endpoints.
+
+## Prerequisites
+
+- Git.
+- A harness that can read `SKILL.md` or `AGENTS.md`.
+- Workstation drive on Windows: Windows PowerShell. `windows-ui-inject/scripts/Invoke-MstscConnect.ps1` prefers Windows PowerShell 5.1 because it uses `Add-Type` and `System.Drawing`. The desktop image is separate from this repo.
+- Local Hyprland (`drive-hyprland`): a Hyprland session, `python3`, `hyprctl`, `grim`, `wtype`, and `ydotool` with `ydotoold` and a writable `/dev/uinput`. `drive-hyprland/scripts/install.sh host` installs packages with `omarchy` or `pacman` when one of those is on `PATH`.
+- PDF training scripts: Python 3 and PyMuPDF (`import fitz`). OCR is optional (`pytesseract` and Pillow). `to_datum.py`, `train_lora.py`, and `test_finetuned.py` need the Tinker SDK (`pip install tinker`). The skill text records `tinker` 0.23.0 as verified.
+- `mcp-server/SKILL.md` is a Python MCP server specification. It documents Python 3.10+ and the MCP Python SDK. This repo does not ship a server package for it.
+- `buzz-relay-self-host/scripts/verify-pair-endpoint.sh` needs `curl`. `jq` is optional.
+
+## Install, check, and run
+
+There is no root `package.json`, `Makefile`, lockfile, or test runner. Checks below are the commands the scripts actually accept.
+
+### Clone
 
 ```bash
 git clone https://github.com/timsonner/agent-skills.git
+cd agent-skills
 ```
 
-**Cross-harness bootstrap:** [AGENTS.md](AGENTS.md)
+### Point Grok at the clone
 
----
+From `agent-workstation-drive/references/harness-install.md`:
 
-## Table of Contents
-
-- [Agent workstation drive (start here for GUI agency)](#agent-workstation-drive-start-here-for-gui-agency)
-- [AI & Agent Harnesses](#ai--agent-harnesses)
-- [Developer SDKs & Protocols](#developer-sdks--protocols)
-- [System Administration & Virtualization](#system-administration--virtualization)
-- [Special Navigation & Browser Helpers](#special-navigation--browser-helpers)
-- [Remote Desktop (Linux)](#remote-desktop-linux)
-- [OpenCode Platform Skills](#opencode-platform-skills)
-- [Penetration Testing Suite](#penetration-testing-suite)
-- [Other skills](#other-skills)
-
----
-
-## Agent workstation drive (start here for GUI agency)
-
-**Intent:** any agent that can clone this repository and run a Windows shell can learn a full **operator loop** — container desktop + RDP + GUI drive — without private session lore.
-
-```text
-clone agent-skills
-  → load agent-workstation-drive
-  → (optional) Install-ToHarness.ps1 or skills.paths = clone
-  → point at a GNOME/GRD image project the user provides
-  → connect with Invoke-MstscConnect.ps1
-  → drive via screenshots + user32 injection
+```toml
+# ~/.grok/config.toml
+[skills]
+paths = ["<absolute-path-to-this-clone>"]
 ```
 
-| Piece | Path |
+Claude Code and Cursor can use the same clone if the agent is allowed to read it. Optional copies go to `~/.claude/skills/<name>/SKILL.md` or `~/.cursor/skills/<name>/SKILL.md`.
+
+### Copy the workstation-drive family (Windows)
+
+`agent-workstation-drive/scripts/Install-ToHarness.ps1` copies these directories: `agent-workstation-drive`, `gnome-wayland-rdp`, `kde-wayland-rdp`, `windows-ui-inject`, `browser-read-bypass`, `wsl-containers`.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\agent-workstation-drive\scripts\Install-ToHarness.ps1 -SourceRoot (Get-Location) -Harness all
+```
+
+`-Harness` is `grok`, `claude`, `cursor`, or `all` (default `all`). Destinations are `%USERPROFILE%\.grok\skills`, `%USERPROFILE%\.claude\skills`, and `%USERPROFILE%\.cursor\skills`.
+
+### Hyprland install script
+
+```bash
+bash drive-hyprland/scripts/install.sh --help
+bash drive-hyprland/scripts/install.sh harness
+bash drive-hyprland/scripts/install.sh harness cursor
+bash drive-hyprland/scripts/install.sh verify
+```
+
+`harness` symlinks this skill into `~/.grok/skills`, `~/.claude/skills`, and `~/.cursor/skills`. The second argument is `grok`, `claude`, `cursor`, or `all` (default `all`).
+
+`verify` checks `hyprctl`, `python3`, `grim`, `wtype`, `ydotool`, `/dev/uinput`, the ydotool socket, and `ydotool.service`.
+
+`host` installs packages, adjusts `/dev/uinput`, and starts the user `ydotool` service. Run it on the Hyprland machine.
+
+### Shell syntax
+
+```bash
+find . -name '*.sh' -not -path './.git/*' -print0 | xargs -0 -n1 bash -n
+```
+
+### PDF to Tinker data
+
+`chunk_pdf.py` imports PyMuPDF before it parses arguments, so `--help` fails until `fitz` is installed.
+
+```bash
+python3 pdf-to-tinker-training/scripts/chunk_pdf.py --pdf <path-to.pdf>
+python3 pdf-to-tinker-training/scripts/chunk_pdf.py --pdf <path-to.pdf> --output <out.jsonl> --pages 10
+python3 pdf-to-tinker-training/scripts/to_datum.py --input <chunks.jsonl>
+python3 pdf-to-tinker-training/scripts/train_lora.py --data <datum.jsonl>
+python3 pdf-to-tinker-training/scripts/test_finetuned.py --checkpoint <checkpoint-name>
+```
+
+`to_datum.py` also takes `--output` and `--model` (default `thinkingmachines/Inkling`). `train_lora.py` also takes `--model`, `--epochs`, `--lr`, `--batch_size`, and `--checkpoint`. `test_finetuned.py` also takes `--model`, `--prompt`, `--num_samples`, `--max_tokens`, and `--temperature`.
+
+### Buzz pairing check
+
+```bash
+bash buzz-relay-self-host/scripts/verify-pair-endpoint.sh https://<buzz-fqdn>
+bash buzz-relay-self-host/scripts/set-agent-avatar.sh <path-to-image.png> --name <name> --about <text>
+```
+
+`set-agent-avatar.sh` reads `BUZZ_RELAY_URL` and `BUZZ_PRIVATE_KEY` from the environment. With no arguments it prints usage and exits 2. The same is true for `verify-pair-endpoint.sh`.
+
+### Desktop session scripts
+
+Both scripts exit 2 until a password is set in the environment. They are meant to run as the desktop user inside the lab image.
+
+```bash
+GNOME_RDP_PASS=<password> bash gnome-wayland-rdp/scripts/start-gnome-headless-rdp.sh
+KRDP_PASS=<password> bash kde-wayland-rdp/scripts/start-krdp.sh
+```
+
+Optional GNOME variables in `start-gnome-headless-rdp.sh`: `DESKTOP_USER`, `GNOME_WIDTH` (default 1920), `GNOME_HEIGHT` (default 1080), `GNOME_RDP_PORT` (default 3389), `GNOME_RDP_USER`, `GRD_TLS_DIR`.
+
+Optional KRdp variables in `start-krdp.sh`: `DESKTOP_USER` (default `kdeuser`), `KRDP_USER`, `KRDP_PORT` (default 3389), `KWIN_WIDTH`, `KWIN_HEIGHT`, `KRDP_TLS_DIR`, `KRDP_QUALITY` (default 40).
+
+Other scripts in those folders (`configure-desktop-ui.sh`, `promote-krdp-output.sh`, `start-kwin-gl.sh`, and the rest) are invoked by the matching `SKILL.md`. Read that file before running them.
+
+### Windows helpers
+
+Offload one job to `agy`, `opencode`, `copilot`, `codex`, or `hermes`:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\harness-offload\scripts\Invoke-HarnessOffload.ps1 -Worker opencode -Prompt "<prompt>" -Dir (Get-Location)
+```
+
+Optional switches on that script: `-AllowTools`, `-Session`, `-Model`.
+
+Connect `mstsc` and save screenshots (click Connect, and read the skill before repeating a click):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\windows-ui-inject\scripts\Invoke-MstscConnect.ps1 -HostAddress <host> -Port <port> -User <user> -Password <password> -ShotDir $env:TEMP\rdp-shots
+```
+
+Optional: `-RdpPath`, `-NoClipboard`.
+
+## Usage
+
+1. For a graphical Linux workstation from Windows, read [AGENTS.md](AGENTS.md), then [agent-workstation-drive/SKILL.md](agent-workstation-drive/SKILL.md). The first-session prompt is [agent-workstation-drive/references/first-session-prompt.md](agent-workstation-drive/references/first-session-prompt.md).
+2. On a local Hyprland session, load [drive-hyprland/SKILL.md](drive-hyprland/SKILL.md) and use `drive-hyprland/scripts/install.sh`.
+3. For any other topic, open the `SKILL.md` in the directory from the layout below. OpenCode topics live under `opencode/`. Tool skills live under `pentest/tools/`.
+4. Keep lab hosts, ports, users, and passwords in the environment or in the command you type. Do not commit them into `SKILL.md`.
+
+Authorized assessment notes live under `pentest/`, `defender-opsec/`, and `wslc-pentest-workflow/`. Use them only inside a scope you are allowed to test.
+
+## Layout
+
+| Path | Role |
 |---|---|
-| **Entry skill** | [agent-workstation-drive/SKILL.md](agent-workstation-drive/SKILL.md) |
-| First-session prompt | [agent-workstation-drive/references/first-session-prompt.md](agent-workstation-drive/references/first-session-prompt.md) |
-| Harness install (Grok / Claude / Cursor) | [agent-workstation-drive/references/harness-install.md](agent-workstation-drive/references/harness-install.md) |
-| Install script | [agent-workstation-drive/scripts/Install-ToHarness.ps1](agent-workstation-drive/scripts/Install-ToHarness.ps1) |
-| Server skill (GNOME Wayland + GRD) | [gnome-wayland-rdp/](gnome-wayland-rdp/) |
-| Server skill (Plasma Wayland + KRdp) | [kde-wayland-rdp/](kde-wayland-rdp/) |
-| Client skill (mstsc + user32) | [windows-ui-inject/](windows-ui-inject/) |
-| Portable mstsc helper | [windows-ui-inject/scripts/Invoke-MstscConnect.ps1](windows-ui-inject/scripts/Invoke-MstscConnect.ps1) |
-| Cross-harness notes | [AGENTS.md](AGENTS.md) |
+| `AGENTS.md` | Bootstrap for the workstation-drive loop |
+| `agent-workstation-drive/` | End-to-end GNOME Wayland RDP plus Windows GUI drive |
+| `gnome-wayland-rdp/` | Headless GNOME Shell with gnome-remote-desktop |
+| `kde-wayland-rdp/` | Headless Plasma on `kwin_wayland` with KRdp |
+| `windows-ui-inject/` | Windows mouse and keyboard injection, including `mstsc` |
+| `browser-read-bypass/` | Alias of `windows-ui-inject` |
+| `drive-hyprland/` | Local Hyprland workspaces, click, type, screenshots |
+| `wsl-containers/` | `wslc` container build, run, and publish notes |
+| `podman/` | Podman create, run, exec, compose, tear down |
+| `proxmox-system-administration/` | Proxmox VE host administration |
+| `proxmox-vm-recovery/` | Stuck UEFI/OVMF VM boot recovery |
+| `agy-harness/` | Drive the Antigravity (`agy`) CLI |
+| `opencode-harness/` | Drive the OpenCode CLI |
+| `opencode/` | OpenCode install, configure, and usage skills |
+| `copilot-harness/` | Drive the GitHub Copilot CLI |
+| `copilot-sdk/` | Python JSON-RPC notes for the Copilot CLI |
+| `codex-harness/` | Drive the Codex CLI |
+| `hermes-harness/` | Drive the Hermes Agent CLI |
+| `harness-offload/` | One-job dispatcher for those CLIs |
+| `ralph-wiggum-pattern/` | Ralph Wiggum feedback-loop coding notes |
+| `mcp-server/` | Python MCP server specification |
+| `read-canvas-browser/` | Canvas and WebGL pages with an empty accessibility tree |
+| `buzz-relay-self-host/` | Self-host Block Buzz, pairing, and `buzz-acp` |
+| `buzz-hermes-gateway/` | Hermes gateway to a Buzz community |
+| `pdf-to-tinker-training/` | PDF to Tinker supervised-pair scripts |
+| `pentest/` | Methodology guide plus per-tool skills under `pentest/tools/` |
+| `defender-opsec/` | Windows Defender privacy settings for an authorized lab |
+| `wslc-pentest-workflow/` | Authorized pentest workflow inside WSL containers |
 
-**In this repo:** skills, scripts (promote monitor, desktop UI, FUSE stub sources, mstsc connect), install docs.  
-**Not in this repo:** a full GNOME container image/Dockerfile — supply a lab image project separately (skills stay portable: no hard-coded host/port).
+## License
 
-Success bar for a new agent: the five criteria in `agent-workstation-drive` (restart desktop stack from docs, open mstsc without human clicks, show an app or full desktop in a screenshot, know which logs to read, no secrets baked into skills).
-
----
-
-## AI & Agent Harnesses
-
-Workflows for launching and controlling coding-agent CLIs over a terminal/PTY.
-
-### Antigravity (Gemini) CLI Harness
-- **Path**: [agy-harness/SKILL.md](agy-harness/SKILL.md)
-- **Description**: Launch and control the Gemini / Antigravity CLI harness (`agy`) over a persistent terminal/PTY session (artifacts, slash commands, exit control).
-
-### OpenCode CLI Harness
-- **Path**: [opencode-harness/SKILL.md](opencode-harness/SKILL.md)
-- **Description**: Drive the OpenCode CLI (`opencode`) programmatically across terminal sessions with PTY-backed control.
-
-### GitHub Copilot CLI Harness
-- **Path**: [copilot-harness/SKILL.md](copilot-harness/SKILL.md)
-- **Description**: Drive the GitHub Copilot CLI (`copilot`) from another agent: one-shot `-p`/`--prompt`, resume/continue, models, skills. JSON-RPC Python is [copilot-sdk](copilot-sdk/SKILL.md).
-
-### OpenAI Codex CLI Harness
-- **Path**: [codex-harness/SKILL.md](codex-harness/SKILL.md)
-- **Description**: Drive the OpenAI Codex CLI (`codex exec`) from another agent: official Windows installer, JSONL, resume. ChatGPT device login or `CODEX_API_KEY`.
-
-### Hermes Agent CLI Harness
-- **Path**: [hermes-harness/SKILL.md](hermes-harness/SKILL.md)
-- **Description**: Drive Nous Hermes Agent (`hermes -z` / `chat -q -Q`) from another agent. Official install.ps1. Gateway/Buzz is [buzz-hermes-gateway](buzz-hermes-gateway/SKILL.md).
-
-### Harness offload
-- **Path**: [harness-offload/SKILL.md](harness-offload/SKILL.md)
-- **Description**: One job shape for `agy` / `opencode` / `copilot` / `codex` / `hermes`: worker, dir, prompt, allow_tools, session. Dispatcher: [Invoke-HarnessOffload.ps1](harness-offload/scripts/Invoke-HarnessOffload.ps1). Flags stay in the per-binary harness skills.
-
-### Ralph Wiggum Pattern
-- **Path**: [ralph-wiggum-pattern/SKILL.md](ralph-wiggum-pattern/SKILL.md)
-- **Description**: Continuous feedback-loop coding: iterate on single items, delegate implementation, self-heal.
-
----
-
-## Developer SDKs & Protocols
-
-### GitHub Copilot Python SDK
-- **Path**: [copilot-sdk/SKILL.md](copilot-sdk/SKILL.md)
-- **Description**: Integrate with the GitHub Copilot CLI via a Python JSON-RPC SDK (technical preview). To *invoke* the CLI from another agent, use [copilot-harness](copilot-harness/SKILL.md).
-
-### Model Context Protocol (MCP) Server
-- **Path**: [mcp-server/SKILL.md](mcp-server/SKILL.md)
-- **Description**: Build production-style MCP servers in Python (resources, tools, prompts, safe stdio).
-
----
-
-## System Administration & Virtualization
-
-### Proxmox System Administration
-- **Path**: [proxmox-system-administration/SKILL.md](proxmox-system-administration/SKILL.md)
-- **Description**: Proxmox VE host admin with host-vs-guest least privilege, service accounts, VM/LXC templates.
-
-### Proxmox Stuck Boot Recovery
-- **Path**: [proxmox-vm-recovery/SKILL.md](proxmox-vm-recovery/SKILL.md)
-- **Description**: Recover UEFI/OVMF stuck VMs (e.g. Windows boot loops), disk mount, EFI repair, config backup.
-
-### WSL Linux Containers
-- **Path**: [wsl-containers/SKILL.md](wsl-containers/SKILL.md)
-- **Description**: Native WSL Containers via `wslc.exe` — build/run/publish cookbook plus CLI/API references. Replaces the older `wslc-containers` name.
-
-### Podman (Linux + Cockpit)
-- **Path**: [podman/SKILL.md](podman/SKILL.md)
-- **Description**: Create, run, exec, compose, and tear down Podman containers; Cockpit UI; rootless defaults.
-
-### Buzz Relay Self-Host
-- **Path**: [buzz-relay-self-host/SKILL.md](buzz-relay-self-host/SKILL.md)
-- **Description**: Self-host Block Buzz (Compose) behind a reverse proxy, WebSockets, mobile pairing, always-on `buzz-acp` agents, optional Hermes. Placeholder-only site inventory.
-- **References**: [hermes-gateway](buzz-relay-self-host/references/hermes-gateway.md) · [mobile-pairing](buzz-relay-self-host/references/mobile-pairing.md) · [buzz-acp-bridge](buzz-relay-self-host/references/buzz-acp-bridge.md) · [agent avatar](buzz-relay-self-host/references/agent-profile-avatar.md)
-
-### Buzz ↔ Hermes Gateway
-- **Path**: [buzz-hermes-gateway/SKILL.md](buzz-hermes-gateway/SKILL.md)
-- **Description**: Connect Hermes Agent gateway to a Buzz community (keys, allowlist, mention rules, authz debugging).
-
----
-
-## Special Navigation & Browser Helpers
-
-### Drive Hyprland (local Linux session)
-- **Path**: [drive-hyprland/SKILL.md](drive-hyprland/SKILL.md)
-- **Description**: Drive the live Hyprland compositor: workspaces, focus, cursor, grim screenshots, Chrome `--new-tab`, `wtype` typing, `ydotool` clicks. Setup/install: [drive-hyprland/scripts/install.sh](drive-hyprland/scripts/install.sh) (`host` = packages + `/dev/uinput` + `ydotoold`; `harness` = symlink into `~/.grok/skills` etc.). Linux counterpart of **windows-ui-inject**. Not the RDP container loop.
-
-### Windows UI inject
-- **Path**: [windows-ui-inject/SKILL.md](windows-ui-inject/SKILL.md)
-- **Description**: Inject clicks/keys on Windows via PowerShell and `user32` when computer-use is screenshot-only. Browsers under tier “read” **and** mstsc (Connect vs Learn more, PID-scoped windows, CredUI limits, cmdkey). Script: [Invoke-MstscConnect.ps1](windows-ui-inject/scripts/Invoke-MstscConnect.ps1). Prefer Windows PowerShell 5.1 for `Add-Type` + System.Drawing.
-
-### Canvas Browser Reading
-- **Path**: [read-canvas-browser/SKILL.md](read-canvas-browser/SKILL.md)
-- **Description**: Visual interaction for canvas/WebGL pages where DOM/a11y trees are empty.
-
----
-
-## Remote Desktop (Linux)
-
-### GNOME Wayland headless RDP (GRD)
-- **Path**: [gnome-wayland-rdp/SKILL.md](gnome-wayland-rdp/SKILL.md)
-- **Description**: GNOME-native remote path — `gnome-shell --wayland --headless` + `gnome-remote-desktop` (not xrdp). Session bus, PipeWire, FUSE clipboard aborts, dual-head Meta-0/Meta-1 promote, log-first triage. Scripts under [gnome-wayland-rdp/scripts/](gnome-wayland-rdp/scripts/). Use with **windows-ui-inject** and **agent-workstation-drive**.
-
-### KDE Plasma Wayland + KRdp
-- **Path**: [kde-wayland-rdp/SKILL.md](kde-wayland-rdp/SKILL.md)
-- **Description**: Latest Plasma on `kwin_wayland --virtual` + `krdpserver --plasma` (not xrdp). OpenGL vs QPainter, vgem/DRM, wslc seccomp, `KWIN_COMPOSE=O2`, mstsc NetworkAutoDetect, titlebar pointer (MOVE-then-button). Scripts under [kde-wayland-rdp/scripts/](kde-wayland-rdp/scripts/). Use with **windows-ui-inject** and **agent-workstation-drive**.
-
-### Linux desktop + xrdp (X11)
-- **Not vendored in this repo.** Prefer the separate Grok user skill **`linux-desktop-rdp-container`** (e.g. under `~/.grok/skills/`) for XFCE/Plasma + xrdp OCI images. Do **not** use that stack as a substitute for GNOME Shell 50 Wayland/GRD.
-
----
-
-## OpenCode Platform Skills
-
-Segmented guides for installing, configuring, and using OpenCode.
-
-### Quick start
-- [Intro](opencode/intro/SKILL.md) · [Prerequisites](opencode/prerequisites/SKILL.md) · [Install](opencode/install/SKILL.md) · [Windows](opencode/windows/SKILL.md)
-
-### Project setup
-- [Initialize](opencode/initialize/SKILL.md) · [Configure guide](opencode/configure-guide/SKILL.md) · [Providers](opencode/providers/SKILL.md)
-
-### Personalization
-- [Customize](opencode/customize/SKILL.md) · [Skill creation](opencode/skill-creation/SKILL.md) · [Plugins](opencode/plugins/SKILL.md)
-
-### Network, server, teams
-- [Network](opencode/network/SKILL.md) · [Server](opencode/server/SKILL.md) · [Enterprise](opencode/enterprise/SKILL.md) · [Ecosystem](opencode/ecosystem/SKILL.md) · [Share](opencode/share/SKILL.md)
-
-### Deep dives
-- [Agents](opencode/configure/agents/SKILL.md) · [LSP](opencode/configure/lsp/SKILL.md) · [Formatters](opencode/configure/formatters/SKILL.md) · [Go](opencode/go/SKILL.md) · [Add features](opencode/usage/add-features/SKILL.md)
-
-Further OpenCode topics live under [`opencode/`](opencode/) (TUI, usage, configure/*, etc.).
-
----
-
-## Penetration Testing Suite
-
-Authorized assessment methodology, attack patterns, and tool skills. Use only with explicit permission and scope.
-
-### Core manuals
-- [Methodology guide](pentest/pentesting-methodology-guide.md) — PTES/OWASP-aligned process and safety
-- [Kali execution](pentest/methodology/SKILL.md) — phased discovery through report
-- [Attack patterns](pentest/attack-patterns/SKILL.md) — common web/Windows recipes
-- [Defender OPSEC](defender-opsec/SKILL.md) — Defender privacy toggles for authorized labs
-- [WSLC pentest workflow](wslc-pentest-workflow/SKILL.md) — pentest tooling inside persistent WSL containers
-
-### Tools
-Entry: [pentest/tools/SKILL.md](pentest/tools/SKILL.md). Individual tool skills under `pentest/tools/` (90+), including for example:
-
-- [nmap](pentest/tools/nmap/SKILL.md) · [nuclei](pentest/tools/nuclei/SKILL.md) · [dirsearch](pentest/tools/dirsearch/SKILL.md)
-- [burp-suite](pentest/tools/burp-suite/SKILL.md) · [bloodhound](pentest/tools/bloodhound/SKILL.md) · [mimikatz](pentest/tools/mimikatz/SKILL.md)
-- [netcat](pentest/tools/netcat/SKILL.md) · [chisel](pentest/tools/chisel/SKILL.md)
-
----
-
-## Other skills
-
-### PDF to Tinker training
-- **Path**: [pdf-to-tinker-training/SKILL.md](pdf-to-tinker-training/SKILL.md)
-- **Description**: Pipeline and scripts for turning PDF material into training/finetune-oriented data (chunking, datum conversion, LoRA helpers under `pdf-to-tinker-training/scripts/`).
-
----
-
-## Conventions
-
-- Skills are directories with a `SKILL.md` (YAML frontmatter `name` + `description`).
-- Prefer **placeholders** (`<host>`, `<port>`, `<user>`) over hard-coded lab endpoints in shared skills.
-- Optional `scripts/` and `references/` live next to the skill that owns them.
-- Workstation-drive **package = this git repo**; harness skill dirs are optional mirrors.
+Skill frontmatter sets `license: MIT` on every `SKILL.md` except `pdf-to-tinker-training/SKILL.md`, which has no `license` field. This repository has no root `LICENSE` file.
